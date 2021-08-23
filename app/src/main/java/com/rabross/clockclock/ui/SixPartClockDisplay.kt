@@ -116,27 +116,41 @@ fun PartClock(
 
     Canvas(modifier = modifier.fillMaxSize(), onDraw = {
         val handColor = Color(0xFF222222)
-        val handWidth = 12.dp.toPx()
-        val borderWidth = 8.dp.toPx()
+        val handWidth = 16.dp.toPx()
+        val borderWidth = 12.dp.toPx()
         val frameWidth = 8.dp.toPx()
+        val outlineWidth = 1.dp.toPx()
         val depth = 4.dp.toPx()
         val radius = size.minDimension / 2.0f - borderWidth
-        val minuteHandLength = radius - borderWidth
-        val hourHandLength = minuteHandLength * 0.8f
-        val hourIndicatorLength = (radius - borderWidth)/10
-        val minuteIndicatorLength = hourIndicatorLength/2
+        val hourIndicatorLength = (radius - borderWidth)/5
+        val minuteIndicatorLength = hourIndicatorLength/4
+        val indicatorOffset = borderWidth + frameWidth/2 + 2.dp.toPx()
+        val minuteHandLength = radius - frameWidth / 2 - outlineWidth
+        val hourHandLength = minuteHandLength - hourIndicatorLength * 2/3
 
-        drawCircle(handColor, handWidth / 2)
-        //shadow
-        drawCircle(Color.LightGray, radius = radius, center = center.copy(y = center.y + depth),style = Stroke(handWidth))
-        drawCircle(Color.White, radius = radius, style = Stroke(frameWidth))
-        drawCircle(Color.LightGray, radius = radius - handWidth/2, style = Stroke(2f))
-        drawCircle(Color.LightGray, radius = radius + handWidth/2, style = Stroke(2f))
-        drawMinuteIndicators(Color.Gray, minuteIndicatorLength, 2.dp.toPx(), borderWidth + handWidth/2)
-        drawHourIndicators(Color.DarkGray, hourIndicatorLength,  2.dp.toPx(), borderWidth + handWidth/2)
+        drawClockShadow(radius, depth)
+        drawClockFrame(radius, frameWidth, outlineWidth)
+        drawMinuteIndicators(Color.Gray, minuteIndicatorLength, 2.dp.toPx(), indicatorOffset)
+        drawHourIndicators(Color.DarkGray, hourIndicatorLength,  2.dp.toPx(), indicatorOffset)
         drawHand(hourDegree, hourHandLength, handColor, handWidth)
         drawHand(minuteDegree, minuteHandLength, handColor, handWidth)
+        drawClockHandCenter(handColor, handWidth / 2)
     })
+}
+
+private fun DrawScope.drawClockHandCenter(color: Color, radius: Float){
+    drawCircle(color, radius)
+    drawCircle(color = Color.Black, radius = radius/3, style = Stroke(4f))
+}
+
+private fun DrawScope.drawClockShadow(radius: Float, depth: Float){
+    drawCircle(Color.LightGray, radius = radius, center = center.copy(y = center.y + depth),style = Stroke(depth * 2))
+}
+
+private fun DrawScope.drawClockFrame(radius: Float, frameWidth: Float, outlineWidth: Float){
+    drawCircle(Color.White, radius = radius, style = Stroke(frameWidth))
+    drawCircle(Color.LightGray, radius = radius - frameWidth/2, style = Stroke(outlineWidth))
+    drawCircle(Color.LightGray, radius = radius + frameWidth/2, style = Stroke(outlineWidth))
 }
 
 private fun DrawScope.drawHourIndicators(color: Color, length: Float, width: Float, offset: Float){
