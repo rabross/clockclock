@@ -10,7 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.rabross.clockclock.ui.PartClock
+import com.rabross.clockclock.ui.Number
 import com.rabross.clockclock.ui.SixPartClockDisplay
 import com.rabross.clockclock.ui.theme.ClockClockTheme
 import kotlinx.coroutines.delay
@@ -21,23 +21,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             ClockClockTheme {
                 Surface(modifier = Modifier.background(color = Color.White)) {
-                    val hour = remember { mutableStateOf(randomAngle) }
-                    val minute = remember { mutableStateOf(randomAngle) }
+                    val number = remember { mutableStateOf<Number>(Number.One) }
                     LaunchedEffect(key1 = Unit, block = {
                         while (true) {
                             delay(1000)
-                            hour.value = randomAngle
-                            minute.value = randomAngle
+                            number.value =
+                                if (number.value == Number.One) Number.Two else Number.One
                         }
                     })
-                    SixPartClockDisplay(Array(6) {
-                        hour.value to minute.value
-                    }, Modifier)
+                    SixPartClockDisplay(number.value)
                 }
             }
         }
     }
-
-    private val randomAngle
-        get() = Math.random().toFloat() * 360f
 }
