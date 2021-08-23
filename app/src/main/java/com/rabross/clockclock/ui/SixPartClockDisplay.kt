@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -26,11 +25,21 @@ typealias SixPartClock = Array<PartClock>
 sealed class Number(val partClocks: SixPartClock) {
 
     companion object {
-        private val BLANK = 45f to 225f
+        private val BLANK = 225f to 225f
     }
 
-    object One : Number(arrayOf(BLANK, 180f to 180f, BLANK, 0f to 180f, BLANK, 0f to 0f))
-    object Two : Number(arrayOf(90f to 90f, 270f to 180f, 180f to 90f, 0f to 270f, 0f to 90f, 270f to 270f))
+    object One : Number(arrayOf(
+        BLANK, 180f to 180f,
+        BLANK, 0f to 180f,
+        BLANK, 0f to 0f))
+    object Two : Number(arrayOf(
+        90f to 90f, 270f to 180f,
+        180f to 90f, 0f to 270f,
+        0f to 90f, 270f to 270f))
+    object Three : Number(arrayOf(
+        90f to 90f, 270f to 180f,
+        90f to 90f, 0f to 270f,
+        90f to 90f, 0f to 270f))
 }
 
 @Preview
@@ -39,8 +48,8 @@ private fun SixPartClockDisplayPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
         BoxWithConstraints {
             Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                SixPartClockDisplay(Number.One, Modifier.weight(1.0f))
-                SixPartClockDisplay(Number.Two, Modifier.weight(1.0f))
+//                SixPartClockDisplay(Number.One, Modifier.weight(1.0f))
+                SixPartClockDisplay(Number.Three, Modifier.weight(1.0f))
             }
         }
     }
@@ -96,11 +105,6 @@ fun PartClock(
     duration: Int = 500,
     modifier: Modifier = Modifier,
 ) {
-
-    val handColor = Color.Black
-    val handWidth = 8.dp.toPx()
-    val border = 8.dp.toPx()
-
     val hourDegree by animateFloatAsState(
         hourHand,
         tween(durationMillis = duration, easing = FastOutSlowInEasing)
@@ -111,12 +115,58 @@ fun PartClock(
     )
 
     Canvas(modifier = modifier.fillMaxSize(), onDraw = {
-        val radius = size.minDimension / 2.0f - border
+        val handColor = Color(0xFF222222)
+        val handWidth = 12.dp.toPx()
+        val borderWidth = 8.dp.toPx()
+        val frameWidth = 8.dp.toPx()
+        val depth = 4.dp.toPx()
+        val radius = size.minDimension / 2.0f - borderWidth
+        val minuteHandLength = radius - borderWidth
+        val hourHandLength = minuteHandLength * 0.8f
+        val hourIndicatorLength = (radius - borderWidth)/10
+        val minuteIndicatorLength = hourIndicatorLength/2
+
         drawCircle(handColor, handWidth / 2)
-        drawCircle(handColor, radius = radius, style = Stroke(handWidth))
-        drawHand(hourDegree, radius * 0.8f, handColor, handWidth)
-        drawHand(minuteDegree, radius, handColor, handWidth)
+        //shadow
+        drawCircle(Color.LightGray, radius = radius, center = center.copy(y = center.y + depth),style = Stroke(handWidth))
+        drawCircle(Color.White, radius = radius, style = Stroke(frameWidth))
+        drawCircle(Color.LightGray, radius = radius - handWidth/2, style = Stroke(2f))
+        drawCircle(Color.LightGray, radius = radius + handWidth/2, style = Stroke(2f))
+        drawMinuteIndicators(Color.Gray, minuteIndicatorLength, 2.dp.toPx(), borderWidth + handWidth/2)
+        drawHourIndicators(Color.DarkGray, hourIndicatorLength,  2.dp.toPx(), borderWidth + handWidth/2)
+        drawHand(hourDegree, hourHandLength, handColor, handWidth)
+        drawHand(minuteDegree, minuteHandLength, handColor, handWidth)
     })
+}
+
+private fun DrawScope.drawHourIndicators(color: Color, length: Float, width: Float, offset: Float){
+    for (i in 0..330 step 30) {
+        drawIndicator(i.toFloat(), length, color, width, offset)
+    }
+}
+
+private fun DrawScope.drawMinuteIndicators(color: Color, length: Float, width: Float, offset: Float){
+    for (i in 0..354 step 6) {
+        drawIndicator(i.toFloat(), length, color, width, offset)
+    }
+}
+
+private fun DrawScope.drawIndicator(
+    degree: Float,
+    length: Float,
+    colour: Color,
+    width: Float,
+    offset: Float
+) {
+    drawContext.canvas.withSave {
+        drawContext.transform.rotate(degree)
+        drawLine(
+            colour,
+            center.copy(y = offset),
+            center.copy(y = offset + length),
+            strokeWidth = width
+        )
+    }
 }
 
 private fun DrawScope.drawHand(
@@ -129,8 +179,8 @@ private fun DrawScope.drawHand(
         drawContext.transform.rotate(degree)
         drawLine(
             handColor,
-            center.copy(y = center.y),
-            drawContext.size.center.copy(y = center.y - length),
+            center,
+            center.copy(y = center.y - length),
             strokeWidth = handWidth
         )
     }
