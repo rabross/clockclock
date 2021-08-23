@@ -37,13 +37,18 @@ sealed class Number(val partClocks: SixPartClock) {
 @Composable
 private fun SixPartClockDisplayPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
-        SixPartClockDisplay(Number.Two, Modifier)
+        BoxWithConstraints {
+            Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                SixPartClockDisplay(Number.One, Modifier.weight(1.0f))
+                SixPartClockDisplay(Number.Two, Modifier.weight(1.0f))
+            }
+        }
     }
 }
 
 @Composable
 fun SixPartClockDisplay(number: Number, modifier: Modifier = Modifier) {
-    SixPartClockDisplay(number.partClocks)
+    SixPartClockDisplay(number.partClocks, modifier)
 }
 
 @Composable
@@ -93,8 +98,8 @@ fun PartClock(
 ) {
 
     val handColor = Color.Black
-    val handWidth = 18.dp.toPx()
-    val border = 18.dp.toPx()
+    val handWidth = 8.dp.toPx()
+    val border = 8.dp.toPx()
 
     val hourDegree by animateFloatAsState(
         hourHand,
