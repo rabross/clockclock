@@ -75,20 +75,104 @@ sealed class Number(val partClocks: SixPartClock) {
 private fun SixPartClockDisplayPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
         BoxWithConstraints {
-            val clockWidth = this.maxWidth / 2
+            val clockWidth = this.maxWidth / 3
             val clockHeight = this.maxHeight / 3
-            Column(verticalArrangement = Arrangement.SpaceEvenly) {
-                Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                    SixPartClockDisplay(Number.Zero, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
-                    SixPartClockDisplay(Number.One, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
+            Column(verticalArrangement = Arrangement.Top) {
+                Row(horizontalArrangement = Arrangement.Start) {
+                    SixPartClockDisplay(
+                        Number.One,
+                        Modifier
+                            .width(clockWidth)
+                            .height(clockHeight),
+                        500,
+                        8.dp,
+                        4.dp,
+                        4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Two,
+                        Modifier
+                            .width(clockWidth)
+                            .height(clockHeight),
+                        500,
+                        8.dp,
+                        4.dp,
+                        4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Three,
+                        Modifier
+                            .width(clockWidth)
+                            .height(clockHeight),
+                        500,
+                        8.dp,
+                        4.dp,
+                        4.dp
+                    )
                 }
-                Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                    SixPartClockDisplay(Number.Two, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
-                    SixPartClockDisplay(Number.Three, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
+                Row(horizontalArrangement = Arrangement.Start) {
+                    SixPartClockDisplay(
+                        Number.Four,
+                        Modifier
+                            .width(clockWidth)
+                            .height(clockHeight),
+                        500,
+                        8.dp,
+                        4.dp,
+                        4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Five,
+                        Modifier
+                            .width(clockWidth)
+                            .height(clockHeight),
+                        500,
+                        8.dp,
+                        4.dp,
+                        4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Six,
+                        Modifier
+                            .width(clockWidth)
+                            .height(clockHeight),
+                        500,
+                        8.dp,
+                        4.dp,
+                        4.dp
+                    )
                 }
-                Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                    SixPartClockDisplay(Number.Four, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
-                    SixPartClockDisplay(Number.Five, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
+                Row(horizontalArrangement = Arrangement.Start) {
+                    SixPartClockDisplay(
+                        Number.Seven,
+                        Modifier
+                            .width(clockWidth)
+                            .height(clockHeight),
+                        500,
+                        8.dp,
+                        4.dp,
+                        4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Eight,
+                        Modifier
+                            .width(clockWidth)
+                            .height(clockHeight),
+                        500,
+                        8.dp,
+                        4.dp,
+                        4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Nine,
+                        Modifier
+                            .width(clockWidth)
+                            .height(clockHeight),
+                        500,
+                        8.dp,
+                        4.dp,
+                        4.dp
+                    )
                 }
             }
         }
@@ -96,25 +180,49 @@ private fun SixPartClockDisplayPreview() {
 }
 
 @Composable
-fun SixPartClockDisplay(number: Number, modifier: Modifier = Modifier) {
-    SixPartClockDisplay(number.partClocks, modifier)
+fun SixPartClockDisplay(
+    number: Number, modifier: Modifier = Modifier,
+    duration: Int = 500,
+    handWidth: Dp = 16.dp,
+    frameWidth: Dp = 8.dp,
+    borderWidth: Dp = 8.dp
+) {
+    SixPartClockDisplay(
+        number.partClocks, modifier,
+        duration,
+        handWidth,
+        frameWidth,
+        borderWidth
+    )
 }
 
 @Composable
-fun SixPartClockDisplay(partClocks: SixPartClock, modifier: Modifier = Modifier) {
+fun SixPartClockDisplay(
+    partClocks: SixPartClock, modifier: Modifier = Modifier,
+    duration: Int = 500,
+    handWidth: Dp = 16.dp,
+    frameWidth: Dp = 8.dp,
+    borderWidth: Dp = 8.dp
+) {
     val rowSize = 2
     val columnSize = 3
     BoxWithConstraints(modifier) {
-        val clockSize = this.maxWidth / rowSize
+        val clockWidth = this.maxWidth / rowSize
+        val clockHeight = this.maxHeight / columnSize
+        val clockSize = clockWidth.coerceAtMost(clockHeight)
         Column(verticalArrangement = Arrangement.SpaceEvenly) {
             (0 until columnSize).forEach { row ->
-                Row(Modifier) {
+                Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                     (0 until rowSize).forEach { column ->
                         val partClock = partClocks[(row * rowSize) + column]
                         PartClock(
                             partClock.first,
                             partClock.second,
-                            modifier = Modifier.size(clockSize)
+                            modifier = Modifier.size(clockSize),
+                            duration,
+                            handWidth,
+                            frameWidth,
+                            borderWidth
                         )
                     }
                 }
@@ -127,14 +235,20 @@ fun SixPartClockDisplay(partClocks: SixPartClock, modifier: Modifier = Modifier)
 fun PartClock(
     hourHand: Int,
     minuteHand: Int,
-    duration: Int = 500,
     modifier: Modifier = Modifier,
+    duration: Int = 500,
+    handWidth: Dp = 16.dp,
+    frameWidth: Dp = 8.dp,
+    borderWidth: Dp = 8.dp
 ) {
     PartClock(
         hourHand = hourHand.toClockHourDegree().toFloat(),
         minuteHand = minuteHand.toClockMinuteDegree().toFloat(),
+        modifier,
         duration,
-        modifier
+        handWidth,
+        frameWidth,
+        borderWidth
     )
 }
 
@@ -142,8 +256,11 @@ fun PartClock(
 fun PartClock(
     hourHand: Float,
     minuteHand: Float,
-    duration: Int = 800,
     modifier: Modifier = Modifier,
+    duration: Int = 800,
+    handWidth: Dp = 16.dp,
+    frameWidth: Dp = 8.dp,
+    borderWidth: Dp = 8.dp
 ) {
     val hourDegree by animateFloatAsState(
         hourHand,
@@ -159,25 +276,22 @@ fun PartClock(
         val minuteIndicatorColor = Color(0xFFEEEEEE)
         val hourIndicatorColor = Color(0xFFDDDDDD)
         val shadowColor = Color(0x33000000)
-        val handWidth = 16.dp.toPx()
-        val borderWidth = 8.dp.toPx()
-        val frameWidth = 8.dp.toPx()
         val outlineWidth = 1.dp.toPx()
-        val depth = 4.dp.toPx()
-        val radius = size.minDimension / 2.0f - borderWidth
-        val hourIndicatorLength = (radius - borderWidth)/5
+        val radius = size.minDimension / 2.0f - borderWidth.toPx()
+        val hourIndicatorLength = (radius - borderWidth.toPx())/5
         val minuteIndicatorLength = hourIndicatorLength/4
-        val indicatorOffset = borderWidth + frameWidth/2 + 2.dp.toPx()
-        val minuteHandLength = radius - frameWidth / 2 - outlineWidth
+        val indicatorOffset = borderWidth.toPx() + frameWidth.toPx()/2 + 2.dp.toPx()
+        val minuteHandLength = radius - frameWidth.toPx() / 2 - outlineWidth
         val hourHandLength = minuteHandLength - hourIndicatorLength * 2/3
+        val shadowDepth = borderWidth.toPx() / 2
 
         drawMinuteIndicators(minuteIndicatorColor, minuteIndicatorLength, 2.dp.toPx(), indicatorOffset)
         drawHourIndicators(hourIndicatorColor, hourIndicatorLength,  2.dp.toPx(), indicatorOffset)
-        drawClockShadow(shadowColor, radius, depth)
-        drawClockFrame(radius, frameWidth, outlineWidth)
-        drawHand(hourDegree, hourHandLength, handColor, handWidth)
-        drawHand(minuteDegree, minuteHandLength, handColor, handWidth)
-        drawClockHandCenter(handColor, handWidth / 2)
+        drawClockShadow(shadowColor, radius, shadowDepth)
+        drawClockFrame(radius, frameWidth.toPx(), outlineWidth)
+        drawHand(hourDegree, hourHandLength, handColor, handWidth.toPx())
+        drawHand(minuteDegree, minuteHandLength, handColor, handWidth.toPx())
+        drawClockHandCenter(handColor, handWidth.toPx() / 2)
     })
 }
 
