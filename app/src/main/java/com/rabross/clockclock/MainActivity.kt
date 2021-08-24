@@ -19,14 +19,17 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val numbers = listOf(Number.Zero, Number.One, Number.Two, Number.Three, Number.Four, Number.Five, Number.Six, Number.Seven, Number.Eight, Number.Nine)
+            var index = 0
             ClockClockTheme {
                 Surface(modifier = Modifier.background(color = Color.White)) {
-                    val number = remember { mutableStateOf<Number>(Number.One) }
+                    val number = remember { mutableStateOf<Number>(Number.Zero) }
+
                     LaunchedEffect(key1 = Unit, block = {
                         while (true) {
                             delay(1000)
-                            number.value =
-                                if (number.value == Number.One) Number.Two else Number.One
+                            index = if(index.inc() == numbers.size) 0 else index.inc()
+                            number.value = numbers[index]
                         }
                     })
                     SixPartClockDisplay(number.value)

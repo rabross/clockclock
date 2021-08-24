@@ -28,6 +28,10 @@ sealed class Number(val partClocks: SixPartClock) {
         private val BLANK = 225f to 225f
     }
 
+    object Zero : Number(arrayOf(
+        90f to 180f, 270f to 180f,
+        0f to 180f, 180f to 0f,
+        0f to 90f, 0f to 270f))
     object One : Number(arrayOf(
         BLANK, 180f to 180f,
         BLANK, 0f to 180f,
@@ -40,6 +44,30 @@ sealed class Number(val partClocks: SixPartClock) {
         90f to 90f, 270f to 180f,
         90f to 90f, 0f to 270f,
         90f to 90f, 0f to 270f))
+    object Four : Number(arrayOf(
+        180f to 180f, 180f to 180f,
+        0f to 90f, 0f to 180f,
+        BLANK, 0f to 0f))
+    object Five : Number(arrayOf(
+        90f to 180f, 270f to 270f,
+        0f to 90f, 180f to 270f,
+        90f to 90f, 0f to 270f))
+    object Six : Number(arrayOf(
+        180f to 90f, 270f to 270f,
+        0f to 180f, 270f to 180f,
+        0f to 90f, 0f to 270f))
+    object Seven : Number(arrayOf(
+        90f to 90f, 270f to 180f,
+        BLANK, 180f to 0f,
+        BLANK, 0f to 0f))
+    object Eight : Number(arrayOf(
+        90f to 180f, 180f to 270f,
+        0f to 90f, 270f to 0f,
+        0f to 90f, 270f to 0f))
+    object Nine : Number(arrayOf(
+        90f to 180f, 270f to 180f,
+        0f to 90f, 0f to 180f,
+        90f to 90f, 270f to 0f))
 }
 
 @Preview
@@ -49,7 +77,7 @@ private fun SixPartClockDisplayPreview() {
         BoxWithConstraints {
             Row(horizontalArrangement = Arrangement.SpaceEvenly) {
 //                SixPartClockDisplay(Number.One, Modifier.weight(1.0f))
-                SixPartClockDisplay(Number.Three, Modifier.weight(1.0f))
+                SixPartClockDisplay(Number.Zero, Modifier.weight(1.0f))
             }
         }
     }
@@ -114,10 +142,10 @@ fun PartClock(
         tween(durationMillis = duration, easing = FastOutSlowInEasing)
     )
 
-    Canvas(modifier = modifier.fillMaxSize(), onDraw = {
+    Canvas(modifier = modifier.fillMaxWidth().aspectRatio(1f, false), onDraw = {
         val handColor = Color(0xFF222222)
         val handWidth = 16.dp.toPx()
-        val borderWidth = 12.dp.toPx()
+        val borderWidth = 8.dp.toPx()
         val frameWidth = 8.dp.toPx()
         val outlineWidth = 1.dp.toPx()
         val depth = 4.dp.toPx()
