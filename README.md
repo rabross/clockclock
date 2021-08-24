@@ -1,7 +1,7 @@
 
 # clockclock
 
-A Jetpack Compose (WIP) project
+A [Jetpack Compose](https://developer.android.com/jetpack/compose) (WIP) project
 
 ![clockclock](https://user-images.githubusercontent.com/3681815/130622930-0baf39cb-c42a-4494-b234-7c2c93dc2710.gif)
 
