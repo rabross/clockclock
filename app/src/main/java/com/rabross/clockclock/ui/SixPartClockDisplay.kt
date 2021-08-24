@@ -140,7 +140,7 @@ fun PartClock(
 fun PartClock(
     hourHand: Float,
     minuteHand: Float,
-    duration: Int = 500,
+    duration: Int = 800,
     modifier: Modifier = Modifier,
 ) {
     val hourDegree by animateFloatAsState(

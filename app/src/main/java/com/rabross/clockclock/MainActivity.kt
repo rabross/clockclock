@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
 
                     LaunchedEffect(key1 = Unit, block = {
                         while (true) {
-                            delay(1000)
+                            delay(1500)
                             index = if(index.inc() == numbers.size) 0 else index.inc()
                             number.value = numbers[index]
                         }
