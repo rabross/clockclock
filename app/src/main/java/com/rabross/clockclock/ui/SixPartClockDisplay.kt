@@ -75,9 +75,19 @@ sealed class Number(val partClocks: SixPartClock) {
 private fun SixPartClockDisplayPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
         BoxWithConstraints {
-            Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-//                SixPartClockDisplay(Number.One, Modifier.weight(1.0f))
-                SixPartClockDisplay(Number.Zero, Modifier.weight(1.0f))
+            Column(verticalArrangement = Arrangement.SpaceEvenly){
+                Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                    SixPartClockDisplay(Number.Zero, Modifier.weight(1.0f))
+                    SixPartClockDisplay(Number.One, Modifier.weight(1.0f))
+                }
+                Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                    SixPartClockDisplay(Number.Two, Modifier.weight(1.0f))
+                    SixPartClockDisplay(Number.Three, Modifier.weight(1.0f))
+                }
+                Row(horizontalArrangement = Arrangement.SpaceEvenly) {
+                    SixPartClockDisplay(Number.Four, Modifier.weight(1.0f))
+                    SixPartClockDisplay(Number.Five, Modifier.weight(1.0f))
+                }
             }
         }
     }
@@ -142,8 +152,11 @@ fun PartClock(
         tween(durationMillis = duration, easing = FastOutSlowInEasing)
     )
 
-    Canvas(modifier = modifier.fillMaxWidth().aspectRatio(1f, false), onDraw = {
+    Canvas(modifier = modifier.aspectRatio(1f, false), onDraw = {
         val handColor = Color(0xFF222222)
+        val minuteIndicatorColor = Color(0xFFEEEEEE)
+        val hourIndicatorColor = Color(0xFFDDDDDD)
+        val shadowColor = Color(0x33000000)
         val handWidth = 16.dp.toPx()
         val borderWidth = 8.dp.toPx()
         val frameWidth = 8.dp.toPx()
@@ -156,10 +169,10 @@ fun PartClock(
         val minuteHandLength = radius - frameWidth / 2 - outlineWidth
         val hourHandLength = minuteHandLength - hourIndicatorLength * 2/3
 
-        drawClockShadow(radius, depth)
+        drawMinuteIndicators(minuteIndicatorColor, minuteIndicatorLength, 2.dp.toPx(), indicatorOffset)
+        drawHourIndicators(hourIndicatorColor, hourIndicatorLength,  2.dp.toPx(), indicatorOffset)
+        drawClockShadow(shadowColor, radius, depth)
         drawClockFrame(radius, frameWidth, outlineWidth)
-        drawMinuteIndicators(Color.Gray, minuteIndicatorLength, 2.dp.toPx(), indicatorOffset)
-        drawHourIndicators(Color.DarkGray, hourIndicatorLength,  2.dp.toPx(), indicatorOffset)
         drawHand(hourDegree, hourHandLength, handColor, handWidth)
         drawHand(minuteDegree, minuteHandLength, handColor, handWidth)
         drawClockHandCenter(handColor, handWidth / 2)
@@ -171,8 +184,8 @@ private fun DrawScope.drawClockHandCenter(color: Color, radius: Float){
     drawCircle(color = Color.Black, radius = radius/3, style = Stroke(4f))
 }
 
-private fun DrawScope.drawClockShadow(radius: Float, depth: Float){
-    drawCircle(Color.LightGray, radius = radius, center = center.copy(y = center.y + depth),style = Stroke(depth * 2))
+private fun DrawScope.drawClockShadow(color: Color, radius: Float, depth: Float){
+    drawCircle(color, radius = radius, center = center.copy(y = center.y + depth),style = Stroke(depth * 2))
 }
 
 private fun DrawScope.drawClockFrame(radius: Float, frameWidth: Float, outlineWidth: Float){
