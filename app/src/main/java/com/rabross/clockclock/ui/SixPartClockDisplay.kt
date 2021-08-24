@@ -75,18 +75,20 @@ sealed class Number(val partClocks: SixPartClock) {
 private fun SixPartClockDisplayPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
         BoxWithConstraints {
-            Column(verticalArrangement = Arrangement.SpaceEvenly){
+            val clockWidth = this.maxWidth / 2
+            val clockHeight = this.maxHeight / 3
+            Column(verticalArrangement = Arrangement.SpaceEvenly) {
                 Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                    SixPartClockDisplay(Number.Zero, Modifier.weight(1.0f))
-                    SixPartClockDisplay(Number.One, Modifier.weight(1.0f))
+                    SixPartClockDisplay(Number.Zero, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
+                    SixPartClockDisplay(Number.One, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
                 }
                 Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                    SixPartClockDisplay(Number.Two, Modifier.weight(1.0f))
-                    SixPartClockDisplay(Number.Three, Modifier.weight(1.0f))
+                    SixPartClockDisplay(Number.Two, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
+                    SixPartClockDisplay(Number.Three, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
                 }
                 Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                    SixPartClockDisplay(Number.Four, Modifier.weight(1.0f))
-                    SixPartClockDisplay(Number.Five, Modifier.weight(1.0f))
+                    SixPartClockDisplay(Number.Four, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
+                    SixPartClockDisplay(Number.Five, Modifier.weight(1.0f).width(clockWidth).height(clockHeight))
                 }
             }
         }
