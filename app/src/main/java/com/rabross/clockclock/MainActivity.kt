@@ -25,9 +25,9 @@ class MainActivity : ComponentActivity() {
             //ClockClockTheme {
             Surface(modifier = Modifier.background(color = Color.White)) {
 
-                val hour = remember { mutableStateOf(0) }
-                val minute = remember { mutableStateOf(0) }
-                val second = remember { mutableStateOf(0) }
+                val hour = remember { mutableStateOf(-1) }
+                val minute = remember { mutableStateOf(-1) }
+                val second = remember { mutableStateOf(-1) }
 
                 lifecycleScope.launch {
                     while (true) {
@@ -69,9 +69,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun Int.twoRightMostDigits(): Pair<Int, Int> {
-        if (this == 0) return 0 to 0
-        val firstDigit: Int = this % 10
-        val secondDigit: Int = if (this < 10) 0 else this / 10 % 10
-        return firstDigit to secondDigit
+        return when(this){
+            -1 -> -1 to -1
+            0 -> 0 to 0
+            else -> {
+                val firstDigit: Int = this % 10
+                val secondDigit: Int = if (this < 10) 0 else this / 10 % 10
+                firstDigit to secondDigit
+            }
+        }
     }
 }

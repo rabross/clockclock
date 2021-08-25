@@ -38,11 +38,16 @@ sealed class Number(val partClocks: SixPartClock) {
                 7 -> Seven
                 8 -> Eight
                 9 -> Nine
-                else -> Zero
+                0 -> Zero
+                else -> Blank
             }
         }
     }
 
+    object Blank : Number(arrayOf(
+        BLANK, BLANK,
+        BLANK, BLANK,
+        BLANK, BLANK))
     object Zero : Number(arrayOf(
         90f to 180f, 270f to 180f,
         0f to 180f, 180f to 0f,
