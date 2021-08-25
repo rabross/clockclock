@@ -198,29 +198,33 @@ private fun OnetoNinePreview() {
 @Composable
 fun SixPartClockDisplayRow(modifier: Modifier = Modifier, digits: Pair<Int, Int>) {
     Row(horizontalArrangement = Arrangement.Start) {
-        SixPartClockDisplay(
-            Number.map(digits.second),
-            modifier,
-            500, 8.dp, 4.dp, 4.dp
-        )
-        SixPartClockDisplay(
-            Number.map(digits.first),
-            modifier,
-            500, 8.dp, 4.dp, 4.dp
-        )
+        digits.reverseMap {
+            SixPartClockDisplay(
+                Number.map(it),
+                modifier,
+                500, 8.dp, 4.dp, 4.dp
+            )
+        }
     }
+}
+
+private inline fun <reified T> Pair<T,T>.reverseMap(block: (value: T) -> Unit){
+    block(second)
+    block(first)
 }
 
 @Composable
 fun SixPartClockDisplay(
-    number: Number, modifier: Modifier = Modifier,
+    number: Number,
+    modifier: Modifier = Modifier,
     duration: Int = 500,
     handWidth: Dp = 16.dp,
     frameWidth: Dp = 8.dp,
     borderWidth: Dp = 8.dp
 ) {
     SixPartClockDisplay(
-        number.partClocks, modifier,
+        number.partClocks,
+        modifier,
         duration,
         handWidth,
         frameWidth,
@@ -230,7 +234,8 @@ fun SixPartClockDisplay(
 
 @Composable
 fun SixPartClockDisplay(
-    partClocks: SixPartClock, modifier: Modifier = Modifier,
+    partClocks: SixPartClock,
+    modifier: Modifier = Modifier,
     duration: Int = 500,
     handWidth: Dp = 16.dp,
     frameWidth: Dp = 8.dp,
