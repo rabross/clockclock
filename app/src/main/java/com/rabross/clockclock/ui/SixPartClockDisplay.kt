@@ -26,6 +26,21 @@ sealed class Number(val partClocks: SixPartClock) {
 
     companion object {
         private val BLANK = 225f to 225f
+
+        fun map(number: Int): Number {
+            return when(number){
+                1 -> One
+                2 -> Two
+                3 -> Three
+                4 -> Four
+                5 -> Five
+                6 -> Six
+                7 -> Seven
+                8 -> Eight
+                9 -> Nine
+                else -> Zero
+            }
+        }
     }
 
     object Zero : Number(arrayOf(
@@ -72,7 +87,7 @@ sealed class Number(val partClocks: SixPartClock) {
 
 @Preview
 @Composable
-private fun SixPartClockDisplayPreview() {
+private fun OnetoNinePreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
         BoxWithConstraints {
             val clockWidth = this.maxWidth / 3
@@ -176,6 +191,23 @@ private fun SixPartClockDisplayPreview() {
                 }
             }
         }
+    }
+}
+
+
+@Composable
+fun SixPartClockDisplayRow(modifier: Modifier = Modifier, digits: Pair<Int, Int>) {
+    Row(horizontalArrangement = Arrangement.Start) {
+        SixPartClockDisplay(
+            Number.map(digits.second),
+            modifier,
+            500, 8.dp, 4.dp, 4.dp
+        )
+        SixPartClockDisplay(
+            Number.map(digits.first),
+            modifier,
+            500, 8.dp, 4.dp, 4.dp
+        )
     }
 }
 
@@ -285,6 +317,7 @@ fun PartClock(
         val hourHandLength = minuteHandLength - hourIndicatorLength * 2/3
         val shadowDepth = borderWidth.toPx() / 2
 
+        drawClockFace(radius)
         drawMinuteIndicators(minuteIndicatorColor, minuteIndicatorLength, 2.dp.toPx(), indicatorOffset)
         drawHourIndicators(hourIndicatorColor, hourIndicatorLength,  2.dp.toPx(), indicatorOffset)
         drawClockShadow(shadowColor, radius, shadowDepth)
@@ -302,6 +335,10 @@ private fun DrawScope.drawClockHandCenter(color: Color, radius: Float){
 
 private fun DrawScope.drawClockShadow(color: Color, radius: Float, depth: Float){
     drawCircle(color, radius = radius, center = center.copy(y = center.y + depth),style = Stroke(depth * 2))
+}
+
+private fun DrawScope.drawClockFace(radius: Float){
+    drawCircle(Color.White, radius = radius)
 }
 
 private fun DrawScope.drawClockFrame(radius: Float, frameWidth: Float, outlineWidth: Float){
