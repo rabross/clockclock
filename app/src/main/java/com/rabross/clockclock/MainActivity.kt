@@ -6,11 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Surface
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.rabross.clockclock.ui.SixPartClockDisplayRow
 import kotlinx.coroutines.delay
@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             //ClockClockTheme {
-            Surface(modifier = Modifier.background(color = Color.White)) {
+            Surface(modifier = Modifier.background(color = Color.White).fillMaxWidth()) {
 
                 val hour = remember { mutableStateOf(-1) }
                 val minute = remember { mutableStateOf(-1) }
@@ -40,25 +40,25 @@ class MainActivity : ComponentActivity() {
                 }
 
                 BoxWithConstraints {
-                    val clockWidth = this.maxWidth / 2
-                    val clockHeight = this.maxHeight / 3
+                    val sixClockWidth = this.maxWidth / 2
+                    val sixClockHeight = this.maxHeight / 3
                     Column(verticalArrangement = Arrangement.Top) {
                         SixPartClockDisplayRow(
                             Modifier
-                                .width(clockWidth)
-                                .height(clockHeight),
+                                .requiredWidthIn(0.dp, sixClockWidth)
+                                .height(sixClockHeight),
                             digits = hour.value.twoRightMostDigits()
                         )
                         SixPartClockDisplayRow(
                             Modifier
-                                .width(clockWidth)
-                                .height(clockHeight),
+                                .requiredWidthIn(0.dp, sixClockWidth)
+                                .height(sixClockHeight),
                             digits = minute.value.twoRightMostDigits()
                         )
                         SixPartClockDisplayRow(
                             Modifier
-                                .width(clockWidth)
-                                .height(clockHeight),
+                                .requiredWidthIn(0.dp, sixClockWidth)
+                                .height(sixClockHeight),
                             digits = second.value.twoRightMostDigits()
                         )
                     }
@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun Int.twoRightMostDigits(): Pair<Int, Int> {
-        return when(this){
+        return when (this) {
             -1 -> -1 to -1
             0 -> 0 to 0
             else -> {
