@@ -11,8 +11,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.lifecycleScope
 import com.rabross.clockclock.ui.SixPartClockDisplayRow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.*
 
 class MainActivity : ComponentActivity() {
@@ -27,7 +29,7 @@ class MainActivity : ComponentActivity() {
                 val minute = remember { mutableStateOf(0) }
                 val second = remember { mutableStateOf(0) }
 
-                LaunchedEffect(key1 = Unit, block = {
+                lifecycleScope.launch {
                     while (true) {
                         delay(1000)
                         val calendar = Calendar.getInstance()
@@ -35,7 +37,7 @@ class MainActivity : ComponentActivity() {
                         minute.value = calendar.get(Calendar.MINUTE)
                         second.value = calendar.get(Calendar.SECOND)
                     }
-                })
+                }
 
                 BoxWithConstraints {
                     val clockWidth = this.maxWidth / 2
