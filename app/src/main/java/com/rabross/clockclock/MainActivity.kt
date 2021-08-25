@@ -46,19 +46,19 @@ class MainActivity : ComponentActivity() {
                         SixPartClockDisplayRow(
                             Modifier
                                 .requiredWidthIn(0.dp, sixClockWidth)
-                                .height(sixClockHeight),
+                                .requiredHeightIn(0.dp, sixClockHeight),
                             digits = hour.value.twoRightMostDigits()
                         )
                         SixPartClockDisplayRow(
                             Modifier
                                 .requiredWidthIn(0.dp, sixClockWidth)
-                                .height(sixClockHeight),
+                                .requiredHeightIn(0.dp, sixClockHeight),
                             digits = minute.value.twoRightMostDigits()
                         )
                         SixPartClockDisplayRow(
                             Modifier
                                 .requiredWidthIn(0.dp, sixClockWidth)
-                                .height(sixClockHeight),
+                                .requiredHeightIn(0.dp, sixClockHeight),
                             digits = second.value.twoRightMostDigits()
                         )
                     }

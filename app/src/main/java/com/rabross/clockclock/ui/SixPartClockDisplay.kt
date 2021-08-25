@@ -90,116 +90,6 @@ sealed class Number(val partClocks: SixPartClock) {
         90f to 90f, 270f to 0f))
 }
 
-@Preview
-@Composable
-private fun OnetoNinePreview() {
-    Surface(modifier = Modifier.background(color = Color.White)) {
-        BoxWithConstraints {
-            val clockWidth = this.maxWidth / 3
-            val clockHeight = this.maxHeight / 3
-            Column(verticalArrangement = Arrangement.Top) {
-                Row(horizontalArrangement = Arrangement.Start) {
-                    SixPartClockDisplay(
-                        Number.One,
-                        Modifier
-                            .width(clockWidth)
-                            .height(clockHeight),
-                        500,
-                        8.dp,
-                        4.dp,
-                        4.dp
-                    )
-                    SixPartClockDisplay(
-                        Number.Two,
-                        Modifier
-                            .width(clockWidth)
-                            .height(clockHeight),
-                        500,
-                        8.dp,
-                        4.dp,
-                        4.dp
-                    )
-                    SixPartClockDisplay(
-                        Number.Three,
-                        Modifier
-                            .width(clockWidth)
-                            .height(clockHeight),
-                        500,
-                        8.dp,
-                        4.dp,
-                        4.dp
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.Start) {
-                    SixPartClockDisplay(
-                        Number.Four,
-                        Modifier
-                            .width(clockWidth)
-                            .height(clockHeight),
-                        500,
-                        8.dp,
-                        4.dp,
-                        4.dp
-                    )
-                    SixPartClockDisplay(
-                        Number.Five,
-                        Modifier
-                            .width(clockWidth)
-                            .height(clockHeight),
-                        500,
-                        8.dp,
-                        4.dp,
-                        4.dp
-                    )
-                    SixPartClockDisplay(
-                        Number.Six,
-                        Modifier
-                            .width(clockWidth)
-                            .height(clockHeight),
-                        500,
-                        8.dp,
-                        4.dp,
-                        4.dp
-                    )
-                }
-                Row(horizontalArrangement = Arrangement.Start) {
-                    SixPartClockDisplay(
-                        Number.Seven,
-                        Modifier
-                            .width(clockWidth)
-                            .height(clockHeight),
-                        500,
-                        8.dp,
-                        4.dp,
-                        4.dp
-                    )
-                    SixPartClockDisplay(
-                        Number.Eight,
-                        Modifier
-                            .width(clockWidth)
-                            .height(clockHeight),
-                        500,
-                        8.dp,
-                        4.dp,
-                        4.dp
-                    )
-                    SixPartClockDisplay(
-                        Number.Nine,
-                        Modifier
-                            .width(clockWidth)
-                            .height(clockHeight),
-                        500,
-                        8.dp,
-                        4.dp,
-                        4.dp
-                    )
-                }
-            }
-        }
-    }
-}
-
-
 @Composable
 fun SixPartClockDisplayRow(modifier: Modifier = Modifier, digits: Pair<Int, Int>) {
     Row(horizontalArrangement = Arrangement.Start) {
@@ -211,11 +101,6 @@ fun SixPartClockDisplayRow(modifier: Modifier = Modifier, digits: Pair<Int, Int>
             )
         }
     }
-}
-
-private inline fun <reified T> Pair<T,T>.reverseMap(block: (value: T) -> Unit){
-    block(second)
-    block(first)
 }
 
 @Composable
@@ -313,7 +198,7 @@ fun PartClock(
         tween(durationMillis = duration, easing = FastOutSlowInEasing)
     )
 
-    Canvas(modifier = modifier.aspectRatio(1f, false), onDraw = {
+    Canvas(modifier = modifier.aspectRatio(1f), onDraw = {
         val handColor = Color(0xFF222222)
         val minuteIndicatorColor = Color(0xFFEEEEEE)
         val hourIndicatorColor = Color(0xFFDDDDDD)
@@ -409,37 +294,147 @@ private fun Int.toClockHourDegree() = this * 360 / 12
 //private fun Int.toClockDegree() = this % 12 * 360 / 12
 private fun Int.toClockMinuteDegree() = this * 360 / 60
 
-@Composable
-private fun Dp.toPx(): Float {
-    return with(LocalDensity.current) {
-        toPx()
-    }
+private val randomAngle
+    get() = Math.random().toFloat() * 360f
+
+private inline fun <reified T> Pair<T,T>.reverseMap(block: (value: T) -> Unit){
+    block(second)
+    block(first)
 }
 
 @Preview
 @Composable
 private fun PartClockPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
-        PartClock(hourHand = 9, minuteHand = 0)
+        PartClock(hourHand = randomAngle,
+            minuteHand = randomAngle,
+            Modifier,
+            0,
+            32.dp,
+            16.dp,
+            16.dp)
     }
 }
 
 @Preview
 @Composable
-private fun PartClockAnimationPreview() {
+private fun SixPartClockPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
-        val hour = remember { mutableStateOf(randomAngle) }
-        val minute = remember { mutableStateOf(randomAngle) }
-        LaunchedEffect(key1 = Unit, block = {
-            while (true) {
-                delay(1000)
-                hour.value = randomAngle
-                minute.value = randomAngle
-            }
-        })
-        PartClock(hourHand = hour.value, minuteHand = minute.value, duration = 500)
+        SixPartClockDisplay(
+            arrayOf(
+                randomAngle to randomAngle, randomAngle to randomAngle,
+                randomAngle to randomAngle, randomAngle to randomAngle,
+                randomAngle to randomAngle, randomAngle to randomAngle),
+            Modifier,
+            0,
+            16.dp,
+            8.dp,
+            8.dp
+        )
     }
 }
 
-private val randomAngle
-    get() = Math.random().toFloat() * 360f
+@Preview
+@Composable
+private fun OnetoNinePreview() {
+    Surface(modifier = Modifier.background(color = Color.White)) {
+        BoxWithConstraints {
+            val clockWidth = this.maxWidth / 3
+            val clockHeight = this.maxHeight / 3
+            Column(verticalArrangement = Arrangement.Top) {
+                Row(horizontalArrangement = Arrangement.Start) {
+                    SixPartClockDisplay(
+                        Number.One,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Two,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Three,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.Start) {
+                    SixPartClockDisplay(
+                        Number.Four,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Five,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Six,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.Start) {
+                    SixPartClockDisplay(
+                        Number.Seven,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Eight,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Nine,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                }
+                Row(horizontalArrangement = Arrangement.Start) {
+                    SixPartClockDisplay(
+                        Number.Blank,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Zero,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                    SixPartClockDisplay(
+                        Number.Blank,
+                        Modifier
+                            .requiredWidthIn(0.dp, clockWidth)
+                            .requiredHeightIn(0.dp, clockHeight),
+                        0, 8.dp, 4.dp, 4.dp
+                    )
+                }
+            }
+        }
+    }
+}
