@@ -19,26 +19,28 @@ import com.rabross.clockclock.ui.randomAngle
 import kotlin.math.atan2
 
 class MainActivity : ComponentActivity() {
+
+    private val clockCount = 66
+    private val rows = 11
+    private val columns = 6
+    private val defaultOffest = Offset(0f,0f)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             //ClockClockTheme {
+
             val clocks = remember {
                 mutableStateOf(
-                    listOf(
-                        randomAngle to randomAngle, randomAngle to randomAngle,
-                        randomAngle to randomAngle, randomAngle to randomAngle,
-                        randomAngle to randomAngle, randomAngle to randomAngle,
-                        randomAngle to randomAngle, randomAngle to randomAngle,
-                        randomAngle to randomAngle, randomAngle to randomAngle,
-                        randomAngle to randomAngle, randomAngle to randomAngle,
-                        randomAngle to randomAngle, randomAngle to randomAngle,
-                        randomAngle to randomAngle,
-                    )
+                    mutableListOf<Pair<Float, Float>>().apply {
+                        repeat(clockCount) {
+                            add(randomAngle to randomAngle)
+                        }
+                    }.toList()
                 )
             }
 
-            val offsetList = arrayOfNulls<Offset>(clocks.value.size)
+            val offsetMap = mutableMapOf<Int, Offset>()
 
             Surface(
                 modifier = Modifier
@@ -57,15 +59,18 @@ class MainActivity : ComponentActivity() {
                             offsetX += dragAmount.x
                             offsetY += dragAmount.y
                             clocks.value = clocks.value.mapIndexed { index, _ ->
-                                val deg = calcAngle(Offset(offsetX.toFloat(), offsetY.toFloat()), offsetList[index]!!)
+                                val deg = calcAngle(
+                                    Offset(offsetX.toFloat(), offsetY.toFloat()),
+                                    offsetMap.getOrElse(index){ defaultOffest }
+                                )
                                 deg to deg
                             }
                         }
                     }
             ) {
 
-                PartClockGridDisplay(clocks.value, 3, 5) { index, offset ->
-                    offsetList[index] = offset
+                PartClockGridDisplay(clocks.value, columns, rows) { index, offset ->
+                    offsetMap[index] = offset
                 }
             }
         }
