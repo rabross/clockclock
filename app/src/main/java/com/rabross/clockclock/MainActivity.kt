@@ -4,79 +4,74 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Surface
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
-import com.rabross.clockclock.ui.SixPartClockDisplayRow
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.util.*
+import androidx.compose.ui.input.pointer.consumeAllChanges
+import androidx.compose.ui.input.pointer.pointerInput
+import com.rabross.clockclock.ui.PartClockGridDisplay
+import com.rabross.clockclock.ui.randomAngle
+import kotlin.math.atan2
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             //ClockClockTheme {
-            Surface(modifier = Modifier.background(color = Color.White).fillMaxWidth()) {
+            val clocks = remember {
+                mutableStateOf(
+                    listOf(
+                        randomAngle to randomAngle, randomAngle to randomAngle,
+                        randomAngle to randomAngle, randomAngle to randomAngle,
+                        randomAngle to randomAngle, randomAngle to randomAngle,
+                        randomAngle to randomAngle, randomAngle to randomAngle,
+                        randomAngle to randomAngle, randomAngle to randomAngle,
+                        randomAngle to randomAngle, randomAngle to randomAngle,
+                        randomAngle to randomAngle, randomAngle to randomAngle,
+                        randomAngle to randomAngle,
+                    )
+                )
+            }
 
-                val hour = remember { mutableStateOf(-1) }
-                val minute = remember { mutableStateOf(-1) }
-                val second = remember { mutableStateOf(-1) }
+            val offsetList = arrayOfNulls<Offset>(clocks.value.size)
 
-                lifecycleScope.launch {
-                    while (true) {
-                        delay(1000)
-                        val calendar = Calendar.getInstance()
-                        hour.value = calendar.get(Calendar.HOUR_OF_DAY)
-                        minute.value = calendar.get(Calendar.MINUTE)
-                        second.value = calendar.get(Calendar.SECOND)
+            Surface(
+                modifier = Modifier
+                    .background(color = Color.White)
+                    .fillMaxWidth()
+                    .pointerInput(Unit) {
+
+                        var offsetX = 0.0
+                        var offsetY = 0.0
+
+                        detectDragGestures({
+                            offsetX = it.x.toDouble()
+                            offsetY = it.y.toDouble()
+                        }) { change, dragAmount ->
+                            change.consumeAllChanges()
+                            offsetX += dragAmount.x
+                            offsetY += dragAmount.y
+                            clocks.value = clocks.value.mapIndexed { index, _ ->
+                                val deg = calcAngle(Offset(offsetX.toFloat(), offsetY.toFloat()), offsetList[index]!!)
+                                deg to deg
+                            }
+                        }
                     }
-                }
+            ) {
 
-                BoxWithConstraints {
-                    val sixClockWidth = this.maxWidth / 2
-                    val sixClockHeight = this.maxHeight / 3
-                    Column(verticalArrangement = Arrangement.Top) {
-                        SixPartClockDisplayRow(
-                            Modifier
-                                .requiredWidthIn(0.dp, sixClockWidth)
-                                .requiredHeightIn(0.dp, sixClockHeight),
-                            digits = hour.value.twoRightMostDigits()
-                        )
-                        SixPartClockDisplayRow(
-                            Modifier
-                                .requiredWidthIn(0.dp, sixClockWidth)
-                                .requiredHeightIn(0.dp, sixClockHeight),
-                            digits = minute.value.twoRightMostDigits()
-                        )
-                        SixPartClockDisplayRow(
-                            Modifier
-                                .requiredWidthIn(0.dp, sixClockWidth)
-                                .requiredHeightIn(0.dp, sixClockHeight),
-                            digits = second.value.twoRightMostDigits()
-                        )
-                    }
+                PartClockGridDisplay(clocks.value, 3, 5) { index, offset ->
+                    offsetList[index] = offset
                 }
             }
-            //}
         }
+        //}
     }
-
-    private fun Int.twoRightMostDigits(): Pair<Int, Int> {
-        return when (this) {
-            -1 -> -1 to -1
-            0 -> 0 to 0
-            else -> {
-                val firstDigit: Int = this % 10
-                val secondDigit: Int = if (this < 10) 0 else this / 10 % 10
-                firstDigit to secondDigit
-            }
-        }
+    private fun calcAngle(origin: Offset, target: Offset): Float {
+        return Math.toDegrees(atan2(target.y - origin.y, target.x - origin.x).toDouble()).toFloat() - 90
     }
 }
