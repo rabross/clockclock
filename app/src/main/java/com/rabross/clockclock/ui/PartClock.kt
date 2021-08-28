@@ -63,7 +63,7 @@ fun PartClock(
     )
 
     Canvas(modifier = modifier.aspectRatio(1f), onDraw = {
-        val handColor = Color(0xFF222222)
+        val handColor = Color(0xFF242424)
         val minuteIndicatorColor = Color(0xFFEEEEEE)
         val hourIndicatorColor = Color(0xFFDDDDDD)
         val shadowColor = Color(0x33000000)
