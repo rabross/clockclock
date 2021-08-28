@@ -183,15 +183,6 @@ private fun OnetoNinePreview() {
 }
 
 @ExperimentalTime
-fun tickerFlow(period: Duration, initialDelay: Duration = Duration.ZERO) = flow {
-    delay(initialDelay)
-    while (true) {
-        emit(Unit)
-        delay(period)
-    }
-}
-
-@ExperimentalTime
 @Preview
 @Composable
 private fun SixPartClockTimePreview() {

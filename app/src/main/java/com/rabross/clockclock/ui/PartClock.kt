@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -24,7 +25,7 @@ private fun PartClockPreview() {
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 private fun PartClockGridDisplayPreview() {
     val clocks = listOf(
@@ -37,11 +38,11 @@ private fun PartClockGridDisplayPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
         PartClockGridDisplay(clocks, 2, 4)
     }
-}
+}*/
 
 @Composable
 fun PartClockGridDisplay(
-    partClocks: List<Pair<Float, Float>>,
+    partClocks: List<Pair<MutableState<Float>, MutableState<Float>>>,
     countX: Int,
     countY: Int,
     modifier: Modifier = Modifier,
@@ -56,10 +57,10 @@ fun PartClockGridDisplay(
                 Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                     (0 until countX).forEach { column ->
                         val index = (row * countX) + column
-                        val partClock = partClocks.getOrElse(index) { 225f to 225f }
+                        val partClock = partClocks[index]
                         PartClock(
-                            partClock.first,
-                            partClock.second,
+                            partClock.first.value,
+                            partClock.second.value,
                             modifier = Modifier.size(clockSize)
                         ) {
                             reportPosition(index, it)
