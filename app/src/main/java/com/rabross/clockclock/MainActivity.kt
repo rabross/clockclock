@@ -33,7 +33,7 @@ private const val AT_REST = 225f
 
 class MainActivity : ComponentActivity() {
 
-    private val rows = 10
+    private val rows = 11
     private val columns = 6
     private val clockCount = rows * columns
 
@@ -54,6 +54,10 @@ class MainActivity : ComponentActivity() {
             var offsetX by remember { mutableStateOf(AT_REST) }
             var offsetY by remember { mutableStateOf(AT_REST) }
 
+            val hour = remember { mutableStateOf(-1) }
+            val minute = remember { mutableStateOf(-1) }
+            val second = remember { mutableStateOf(-1) }
+
             Surface(
                 modifier = Modifier
                     .background(color = Color.White)
@@ -67,7 +71,7 @@ class MainActivity : ComponentActivity() {
 
                         detectDragGestures(
                             onDragStart = {
-                                idleAnimtion?.cancel()
+                                runTimeAnimation(hour, minute, second)
                                 offsetX = it.x
                                 offsetY = it.y
                             },
@@ -76,7 +80,9 @@ class MainActivity : ComponentActivity() {
                                 offsetX += dragAmount.x
                                 offsetY += dragAmount.y
                             },
-                            onDragEnd = { /*runAnimations(clocks)*/ }
+                            onDragEnd = {
+                                runIdleAnimations(clocks)
+                            }
                         )
                     }
             ) {
@@ -90,26 +96,17 @@ class MainActivity : ComponentActivity() {
                     item.second.value = deg
                 }
 
-                val hour = remember { mutableStateOf(-1) }
-                val minute = remember { mutableStateOf(-1) }
-                val second = remember { mutableStateOf(-1) }
-
-                tickerFlow(Duration.seconds(1), Duration.seconds(1))
-                    .map { Calendar.getInstance() }
-                    .distinctUntilChanged { old, new ->
-                        old.get(Calendar.SECOND) == new.get(Calendar.SECOND)
-                    }
-                    .onEach { calendar ->
-                        hour.value = calendar.get(Calendar.HOUR_OF_DAY)
-                        minute.value = calendar.get(Calendar.MINUTE)
-                        second.value = calendar.get(Calendar.SECOND)
-                    }
-                    .launchIn(CoroutineScope(Dispatchers.IO))
-
                 val numWidth = 2
-                val digits = second.value.twoRightMostDigits()
-                clocks.insert(columns, Number.map(digits.first).partClocks, numWidth, numWidth + 1, 1)
-                clocks.insert(columns, Number.map(digits.second).partClocks, numWidth, 1, 1)
+                val numHeight = 3
+                val digitsHour = hour.value.twoRightMostDigits()
+                val digitsMinute = minute.value.twoRightMostDigits()
+                val digitsSecond = second.value.twoRightMostDigits()
+                clocks.insert(columns, Number.map(digitsHour.first).partClocks, numWidth, numWidth + 1, 1)
+                clocks.insert(columns, Number.map(digitsHour.second).partClocks, numWidth, 1, 1)
+                clocks.insert(columns, Number.map(digitsMinute.first).partClocks, numWidth, numWidth + 1, numHeight + 1)
+                clocks.insert(columns, Number.map(digitsMinute.second).partClocks, numWidth, 1, numHeight + 1)
+                clocks.insert(columns, Number.map(digitsSecond.first).partClocks, numWidth, numWidth + 1, numHeight * 2 + 1)
+                clocks.insert(columns, Number.map(digitsSecond.second).partClocks, numWidth, 1, numHeight * 2 + 1)
                 PartClockGridDisplay(clocks, columns, rows) { index, offset ->
                     offsetMap[index] = offset
                 }
@@ -144,6 +141,7 @@ class MainActivity : ComponentActivity() {
         }
 
     private var idleAnimtion: Job? = null
+    private var timeAnimation: Job? = null
     private val animations = listOf(animDiff, animOpposite, animSame)
 
     @ExperimentalTime
@@ -154,15 +152,32 @@ class MainActivity : ComponentActivity() {
     }
 
     @ExperimentalTime
-    private fun runAnimations(clocks: MutableList<Pair<MutableState<Float>, MutableState<Float>>>) {
+    private fun runIdleAnimations(clocks: MutableList<Pair<MutableState<Float>, MutableState<Float>>>) {
+        timeAnimation?.cancel()
         val anim = animations.random()
-        idleAnimtion = startTicker(Duration.seconds(2)) {
-            clocks.forEachIndexed { index, item ->
-                if(index !in 0..26) {
-                    anim(item)
-                }
-            }
+        idleAnimtion = startTicker(Duration.seconds(1)) {
+            clocks.forEach(anim)
         }
+    }
+
+    @ExperimentalTime
+    private fun runTimeAnimation(
+        hour: MutableState<Int>,
+        minute: MutableState<Int>,
+        second: MutableState<Int>
+    ) {
+        idleAnimtion?.cancel()
+        timeAnimation = tickerFlow(Duration.milliseconds(500))
+            .map { Calendar.getInstance() }
+            .distinctUntilChanged { old, new ->
+                old.get(Calendar.SECOND) == new.get(Calendar.SECOND)
+            }
+            .onEach { calendar ->
+                hour.value = calendar.get(Calendar.HOUR_OF_DAY)
+                minute.value = calendar.get(Calendar.MINUTE)
+                second.value = calendar.get(Calendar.SECOND)
+            }
+            .launchIn(CoroutineScope(Dispatchers.IO))
     }
 
     private fun hasEnoughSpaceForFullClock(width: Int, height: Int): Boolean {
