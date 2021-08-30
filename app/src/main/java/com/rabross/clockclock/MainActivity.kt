@@ -51,8 +51,8 @@ class MainActivity : ComponentActivity() {
 
             val offsetMap = mutableMapOf<Int, Offset>()
 
-            var offsetX by remember { mutableStateOf(AT_REST) }
-            var offsetY by remember { mutableStateOf(AT_REST) }
+            var offsetX by remember { mutableStateOf(-1f) }
+            var offsetY by remember { mutableStateOf(-1f) }
 
             val hour = remember { mutableStateOf(-1) }
             val minute = remember { mutableStateOf(-1) }
@@ -88,12 +88,14 @@ class MainActivity : ComponentActivity() {
             ) {
 
                 clocks.forEachIndexed { index, item ->
-                    val origin = Offset(offsetX, offsetY)
-                    val target = offsetMap.getOrElse(index) { Offset(offsetX + 1, offsetY - 1) }
-                    val deg = calcAngle(origin, target) % 360
-
-                    item.first.value = deg
-                    item.second.value = deg
+                    offsetMap[index]?.let { offset ->
+                        if(offsetX != -1f && offsetY != -1f) {
+                            val origin = Offset(offsetX, offsetY)
+                            val deg = calcAngle(origin, offset) % 360
+                            item.first.value = deg
+                            item.second.value = deg
+                        }
+                    }
                 }
 
                 val numWidth = 2
@@ -101,16 +103,20 @@ class MainActivity : ComponentActivity() {
                 val digitsHour = hour.value.twoRightMostDigits()
                 val digitsMinute = minute.value.twoRightMostDigits()
                 val digitsSecond = second.value.twoRightMostDigits()
+
                 clocks.insert(columns, Number.map(digitsHour.first).partClocks, numWidth, numWidth + 1, 1)
                 clocks.insert(columns, Number.map(digitsHour.second).partClocks, numWidth, 1, 1)
                 clocks.insert(columns, Number.map(digitsMinute.first).partClocks, numWidth, numWidth + 1, numHeight + 1)
                 clocks.insert(columns, Number.map(digitsMinute.second).partClocks, numWidth, 1, numHeight + 1)
                 clocks.insert(columns, Number.map(digitsSecond.first).partClocks, numWidth, numWidth + 1, numHeight * 2 + 1)
                 clocks.insert(columns, Number.map(digitsSecond.second).partClocks, numWidth, 1, numHeight * 2 + 1)
+
                 PartClockGridDisplay(clocks, columns, rows) { index, offset ->
                     offsetMap[index] = offset
                 }
             }
+
+            runTimeAnimation(hour, minute, second)
         }
         //}
     }
@@ -124,25 +130,25 @@ class MainActivity : ComponentActivity() {
 
     private val animDiff: (Pair<MutableState<Float>, MutableState<Float>>) -> Unit =
         { item ->
-            item.first.value = item.first.value + 0.05f
-            item.second.value = item.second.value + 0.025f
+            item.first.value = (item.first.value + 0.025f) % 360
+            item.second.value = (item.second.value + 0.05f) % 360
         }
 
     private val animSame: (Pair<MutableState<Float>, MutableState<Float>>) -> Unit =
         { item ->
-            item.first.value = item.first.value + 0.05f
-            item.second.value = item.second.value + 0.05f
+            item.first.value = (item.first.value + 0.05f) % 360
+            item.second.value = (item.second.value + 0.05f) % 360
         }
 
     private val animOpposite: (Pair<MutableState<Float>, MutableState<Float>>) -> Unit =
         { item ->
-            item.first.value = item.first.value - 0.05f
-            item.second.value = item.second.value + 0.05f
+            item.first.value = (item.first.value - 0.025f) % 360
+            item.second.value = (item.second.value + 0.05f) % 360
         }
 
     private var idleAnimtion: Job? = null
     private var timeAnimation: Job? = null
-    private val animations = listOf(animDiff, animOpposite, animSame)
+    private val animations = listOf(animDiff, animOpposite)
 
     @ExperimentalTime
     private fun startTicker(startDelay: Duration = Duration.seconds(1), onTick: () -> Unit): Job {
@@ -154,6 +160,7 @@ class MainActivity : ComponentActivity() {
     @ExperimentalTime
     private fun runIdleAnimations(clocks: MutableList<Pair<MutableState<Float>, MutableState<Float>>>) {
         timeAnimation?.cancel()
+        idleAnimtion?.cancel()
         val anim = animations.random()
         idleAnimtion = startTicker(Duration.seconds(1)) {
             clocks.forEach(anim)
@@ -167,6 +174,7 @@ class MainActivity : ComponentActivity() {
         second: MutableState<Int>
     ) {
         idleAnimtion?.cancel()
+        timeAnimation?.cancel()
         timeAnimation = tickerFlow(Duration.milliseconds(500))
             .map { Calendar.getInstance() }
             .distinctUntilChanged { old, new ->
