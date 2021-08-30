@@ -7,9 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Surface
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -25,6 +23,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlin.math.atan2
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
+
+private const val AT_REST = 225f
 
 class MainActivity : ComponentActivity() {
 
@@ -42,9 +42,12 @@ class MainActivity : ComponentActivity() {
 
             val clocks = mutableListOf<Pair<MutableState<Float>, MutableState<Float>>>().apply {
                 repeat(clockCount) {
-                    add(remember { mutableStateOf(225f) } to remember { mutableStateOf(225f) })
+                    add(remember { mutableStateOf(AT_REST) } to remember { mutableStateOf(AT_REST) })
                 }
-            }.toList()
+            }
+
+            var offsetX by remember { mutableStateOf(AT_REST) }
+            var offsetY by remember { mutableStateOf(AT_REST) }
 
             Surface(
                 modifier = Modifier
@@ -52,44 +55,42 @@ class MainActivity : ComponentActivity() {
                     .fillMaxWidth()
                     .pointerInput(Unit) {
 
-                        var offsetX = 0.0
-                        var offsetY = 0.0
-
                         /*detectTapGestures {
-                            idleAnimtion?.cancel()
-                            val anim = animations.random()
-                            idleAnimtion = startIdle(Duration.ZERO) {
-                                clocks.forEach(anim)
-                            }
+                            offsetX = it.x
+                            offsetY = it.y
                         }*/
 
                         detectDragGestures(
                             onDragStart = {
                                 idleAnimtion?.cancel()
-                                offsetX = it.x.toDouble()
-                                offsetY = it.y.toDouble()
+                                offsetX = it.x
+                                offsetY = it.y
                             },
                             onDrag = { change, dragAmount ->
                                 change.consumeAllChanges()
                                 offsetX += dragAmount.x
                                 offsetY += dragAmount.y
-                                clocks.forEachIndexed { index, item ->
-                                    val origin = Offset(offsetX.toFloat(), offsetY.toFloat())
-                                    val target = offsetMap.getOrElse(index) { defaultOffset }
-                                    val deg = calcAngle(origin, target)
-
-                                    item.first.value  = deg
-                                    item.second.value = deg
-                                }
                             },
                             onDragEnd = {
                                 val anim = animations.random()
-                                idleAnimtion = startTicker(Duration.seconds(1)) {
+                                idleAnimtion = startTicker(Duration.seconds(2)) {
                                     clocks.forEach(anim)
                                 }
-                            })
+                            }
+                        )
                     }
             ) {
+
+                clocks.forEachIndexed { index, item ->
+                    val origin = Offset(offsetX, offsetY)
+                    val target = offsetMap.getOrElse(index) { Offset(offsetX+1, offsetY-1) }
+                    val deg = calcAngle(origin, target) % 360
+
+                    item.first.value = deg
+                    item.second.value = deg
+                }
+
+                //Log.i("rob", "clock target ${clocks[0].first.value}")
 
                 PartClockGridDisplay(clocks, columns, rows) { index, offset ->
                     offsetMap[index] = offset
