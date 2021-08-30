@@ -18,3 +18,15 @@ internal fun tickerFlow(period: Duration, initialDelay: Duration = Duration.ZERO
         delay(period)
     }
 }
+
+fun Int.twoRightMostDigits(): Pair<Int, Int> {
+    return when (this) {
+        -1 -> -1 to -1
+        0 -> 0 to 0
+        else -> {
+            val firstDigit: Int = this % 10
+            val secondDigit: Int = if (this < 10) 0 else this / 10 % 10
+            firstDigit to secondDigit
+        }
+    }
+}
