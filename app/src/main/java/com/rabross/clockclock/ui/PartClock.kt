@@ -67,7 +67,6 @@ fun PartClock(
         val minuteIndicatorColor = Color(0xFFEEEEEE)
         val hourIndicatorColor = Color(0xFFDDDDDD)
         val shadowColor = Color(0x33000000)
-        val outlineWidth = 1.dp.toPx()
         val center = size.minDimension / 2.0f
         val borderWidth = center / 10
         val radius = center - borderWidth
@@ -75,14 +74,17 @@ fun PartClock(
         val frameWidth = handWidth / 2
         val hourIndicatorLength = (radius - borderWidth)/5
         val minuteIndicatorLength = hourIndicatorLength/4
-        val indicatorOffset = borderWidth + frameWidth/2 + 2.dp.toPx()
+        val hourIndicatorHandWidth = radius * 0.02f
+        val minuteIndicatorHandWidth = hourIndicatorHandWidth / 2
+        val outlineWidth = minuteIndicatorHandWidth / 2
         val minuteHandLength = radius - frameWidth / 2 - outlineWidth
         val hourHandLength = minuteHandLength - hourIndicatorLength * 2/3
+        val indicatorOffset = borderWidth + frameWidth/2 + hourIndicatorHandWidth
         val shadowDepth = borderWidth / 2
 
         drawClockFace(radius)
-        drawMinuteIndicators(minuteIndicatorColor, minuteIndicatorLength, 2.dp.toPx(), indicatorOffset)
-        drawHourIndicators(hourIndicatorColor, hourIndicatorLength,  2.dp.toPx(), indicatorOffset)
+        drawMinuteIndicators(minuteIndicatorColor, minuteIndicatorLength, minuteIndicatorHandWidth, indicatorOffset)
+        drawHourIndicators(hourIndicatorColor, hourIndicatorLength,  hourIndicatorHandWidth, indicatorOffset)
         drawHand(hourDegree, hourHandLength, handColor, handWidth)
         drawHand(minuteDegree, minuteHandLength, handColor, handWidth)
         drawClockHandCenter(handColor, handWidth / 2)
