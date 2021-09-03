@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import com.rabross.clockclock.ui.PartClockGridDisplay
-import com.rabross.clockclock.ui.models.Number
 import com.rabross.clockclock.ui.tickerFlow
 import com.rabross.clockclock.ui.twoRightMostDigits
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +27,7 @@ import java.util.*
 import kotlin.math.atan2
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
+import com.rabross.clockclock.ui.models.Number
 
 private const val AT_REST = 225f
 
@@ -43,13 +43,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             //ClockClockTheme {
 
-            val clocks = mutableListOf<Pair<MutableState<Float>, MutableState<Float>>>().apply {
-                repeat(clockCount) {
-                    add(remember { mutableStateOf(AT_REST) } to remember { mutableStateOf(AT_REST) })
-                }
-            }
-
             val offsetMap = mutableMapOf<Int, Offset>()
+
+            val clocks = remember { mutableStateOf(mutableListOf<Pair<Float, Float>>().apply {
+                    repeat(clockCount) {
+                        add(AT_REST to AT_REST)
+                    }
+                }.toList()
+            )}
 
             var offsetX by remember { mutableStateOf(-1f) }
             var offsetY by remember { mutableStateOf(-1f) }
@@ -71,7 +72,7 @@ class MainActivity : ComponentActivity() {
 
                         detectDragGestures(
                             onDragStart = {
-                                runTimeAnimation(hour, minute, second)
+                                timeAnimation?.cancel()
                                 offsetX = it.x
                                 offsetY = it.y
                             },
@@ -79,24 +80,24 @@ class MainActivity : ComponentActivity() {
                                 change.consumeAllChanges()
                                 offsetX += dragAmount.x
                                 offsetY += dragAmount.y
+
+                                clocks.value = clocks.value.mapIndexed { index, pair ->
+                                    offsetMap[index]?.let { offset ->
+                                        if(offsetX != -1f && offsetY != -1f) {
+                                            val origin = Offset(offsetX, offsetY)
+                                            val deg = calcAngle(origin, offset) % 360
+                                            deg to deg
+                                        } else pair
+                                    } ?: pair
+                                }
                             },
                             onDragEnd = {
-                                runIdleAnimations(clocks)
+                                runTimeAnimation(hour, minute, second)
+                                //runIdleAnimations(clocks)
                             }
                         )
                     }
             ) {
-
-                clocks.forEachIndexed { index, item ->
-                    offsetMap[index]?.let { offset ->
-                        if(offsetX != -1f && offsetY != -1f) {
-                            val origin = Offset(offsetX, offsetY)
-                            val deg = calcAngle(origin, offset) % 360
-                            item.first.value = deg
-                            item.second.value = deg
-                        }
-                    }
-                }
 
                 val numWidth = 2
                 val numHeight = 3
@@ -104,14 +105,16 @@ class MainActivity : ComponentActivity() {
                 val digitsMinute = minute.value.twoRightMostDigits()
                 val digitsSecond = second.value.twoRightMostDigits()
 
-                clocks.insert(columns, Number.map(digitsHour.first).partClocks, numWidth, numWidth + 1, 1)
-                clocks.insert(columns, Number.map(digitsHour.second).partClocks, numWidth, 1, 1)
-                clocks.insert(columns, Number.map(digitsMinute.first).partClocks, numWidth, numWidth + 1, numHeight + 1)
-                clocks.insert(columns, Number.map(digitsMinute.second).partClocks, numWidth, 1, numHeight + 1)
-                clocks.insert(columns, Number.map(digitsSecond.first).partClocks, numWidth, numWidth + 1, numHeight * 2 + 1)
-                clocks.insert(columns, Number.map(digitsSecond.second).partClocks, numWidth, 1, numHeight * 2 + 1)
+                if(timeAnimation?.isActive == true) {
+                    clocks.value = clocks.value.insert(columns, Number.map(digitsHour.first).partClocks, numWidth, numWidth + 1, 1)
+                    clocks.value = clocks.value.insert(columns, Number.map(digitsHour.second).partClocks, numWidth, 1, 1)
+                    clocks.value = clocks.value.insert(columns, Number.map(digitsMinute.first).partClocks, numWidth, numWidth + 1, numHeight + 1)
+                    clocks.value = clocks.value.insert(columns, Number.map(digitsMinute.second).partClocks, numWidth, 1, numHeight + 1)
+                    clocks.value = clocks.value.insert(columns, Number.map(digitsSecond.first).partClocks, numWidth, numWidth + 1, numHeight * 2 + 1)
+                    clocks.value = clocks.value.insert(columns, Number.map(digitsSecond.second).partClocks, numWidth, 1, numHeight * 2 + 1)
+                }
 
-                PartClockGridDisplay(clocks, columns, rows) { index, offset ->
+                PartClockGridDisplay(clocks.value, columns, rows) { index, offset ->
                     offsetMap[index] = offset
                 }
             }
@@ -198,20 +201,23 @@ class MainActivity : ComponentActivity() {
         return (n-x+1)*(m-y+1)
     }
 
-    private fun MutableList<Pair<MutableState<Float>, MutableState<Float>>>.insert(
+    private fun List<Pair<Float, Float>>.insert(
         width: Int,
         set: Array<Pair<Float, Float>>,
         setWidth: Int,
         offsetX: Int = 0,
-        offsetY: Int = 0){
+        offsetY: Int = 0) : List<Pair<Float, Float>> {
+
+        val temp = this.toMutableList()
 
         set.forEachIndexed { index, pair ->
             val row = index / setWidth
             val column = index % setWidth
             val mapped = (row + offsetY) * width + column + offsetX
 
-            this[mapped].first.value = pair.first
-            this[mapped].second.value = pair.second
+            temp[mapped] = pair
         }
+
+        return temp
     }
 }

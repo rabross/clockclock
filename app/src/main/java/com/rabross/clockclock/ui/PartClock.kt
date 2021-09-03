@@ -5,15 +5,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.withSave
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -42,7 +41,7 @@ private fun PartClockGridDisplayPreview() {
 
 @Composable
 fun PartClockGridDisplay(
-    partClocks: List<Pair<MutableState<Float>, MutableState<Float>>>,
+    partClocks: List<Pair<Float, Float>>,
     countX: Int,
     countY: Int,
     modifier: Modifier = Modifier,
@@ -58,13 +57,13 @@ fun PartClockGridDisplay(
                     (0 until countX).forEach { column ->
                         val index = (row * countX) + column
                         val partClock = partClocks[index]
-                        PartClock(
-                            partClock.first.value,
-                            partClock.second.value,
-                            modifier = Modifier.size(clockSize)
-                        ) {
-                            reportPosition(index, it)
-                        }
+                        PartClock(partClock.first, partClock.second,
+                            modifier = Modifier
+                                .size(clockSize)
+                                .onGloballyPositioned { coordinates ->
+                                    reportPosition(index, coordinates.boundsInRoot().center)
+                                }
+                        )
                     }
                 }
             }
@@ -78,7 +77,6 @@ fun PartClock(
     minuteHand: Int,
     modifier: Modifier = Modifier
 ) {
-
     PartClock(
         hourHand.toClockHourDegree(),
         minuteHand.toClockMinuteDegree(),
@@ -90,8 +88,7 @@ fun PartClock(
 fun PartClock(
     hourHandDegree: Float = 225f,
     minuteHandDegree: Float = 225f,
-    modifier: Modifier = Modifier,
-    reportPosition: (Offset) -> Unit = {}
+    modifier: Modifier = Modifier
 ) {
     /*val hourDegree by animateFloatAsState(
         hourHand,
@@ -102,24 +99,10 @@ fun PartClock(
         tween(durationMillis = duration, easing = FastOutSlowInEasing)
     )*/
 
-    var globalPosition = Offset(0f, 0f)
-
     Canvas(
         modifier = modifier
             .aspectRatio(1f)
-            .onGloballyPositioned { coordinates ->
-                globalPosition = coordinates.positionInRoot()
-
-            }
     ) {
-
-        val positionCentre = size.minDimension / 2.0f
-        reportPosition(
-            Offset(
-                globalPosition.x + positionCentre,
-                globalPosition.y + positionCentre
-            )
-        )
         val handColor = Color(0xFF242424)
         val minuteIndicatorColor = Color(0xFFEEEEEE)
         val hourIndicatorColor = Color(0xFFDDDDDD)
