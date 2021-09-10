@@ -106,12 +106,17 @@ class MainActivity : ComponentActivity() {
                 val digitsSecond = second.value.twoRightMostDigits()
 
                 if(timeAnimation?.isActive == true) {
-                    clocks.value = clocks.value.insert(columns, Number.map(digitsHour.first).partClocks, numWidth, numWidth + 1, 1)
-                    clocks.value = clocks.value.insert(columns, Number.map(digitsHour.second).partClocks, numWidth, 1, 1)
-                    clocks.value = clocks.value.insert(columns, Number.map(digitsMinute.first).partClocks, numWidth, numWidth + 1, numHeight + 1)
-                    clocks.value = clocks.value.insert(columns, Number.map(digitsMinute.second).partClocks, numWidth, 1, numHeight + 1)
-                    clocks.value = clocks.value.insert(columns, Number.map(digitsSecond.first).partClocks, numWidth, numWidth + 1, numHeight * 2 + 1)
-                    clocks.value = clocks.value.insert(columns, Number.map(digitsSecond.second).partClocks, numWidth, 1, numHeight * 2 + 1)
+
+                    val temp = clocks.value.toMutableList()
+
+                    temp.insert(columns, Number.map(digitsHour.first).partClocks, numWidth, numWidth + 1, 1)
+                    temp.insert(columns, Number.map(digitsHour.second).partClocks, numWidth, 1, 1)
+                    temp.insert(columns, Number.map(digitsMinute.first).partClocks, numWidth, numWidth + 1, numHeight + 1)
+                    temp.insert(columns, Number.map(digitsMinute.second).partClocks, numWidth, 1, numHeight + 1)
+                    temp.insert(columns, Number.map(digitsSecond.first).partClocks, numWidth, numWidth + 1, numHeight * 2 + 1)
+                    temp.insert(columns, Number.map(digitsSecond.second).partClocks, numWidth, 1, numHeight * 2 + 1)
+
+                    clocks.value = temp
                 }
 
                 PartClockGridDisplay(clocks.value, columns, rows) { index, offset ->
@@ -201,23 +206,19 @@ class MainActivity : ComponentActivity() {
         return (n-x+1)*(m-y+1)
     }
 
-    private fun List<Pair<Float, Float>>.insert(
+    private fun MutableList<Pair<Float, Float>>.insert(
         width: Int,
         set: Array<Pair<Float, Float>>,
         setWidth: Int,
         offsetX: Int = 0,
-        offsetY: Int = 0) : List<Pair<Float, Float>> {
-
-        val temp = this.toMutableList()
+        offsetY: Int = 0) {
 
         set.forEachIndexed { index, pair ->
             val row = index / setWidth
             val column = index % setWidth
             val mapped = (row + offsetY) * width + column + offsetX
 
-            temp[mapped] = pair
+            this[mapped] = pair
         }
-
-        return temp
     }
 }
