@@ -1,5 +1,6 @@
 package com.rabross.clockclock.ui
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,12 +16,13 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlin.math.*
 
 @Preview
 @Composable
 private fun PartClockPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
-        PartClock(randomAngle, randomAngle, Modifier)
+        PartClock(randomAngle, randomAngle, false, Modifier)
     }
 }
 
@@ -45,6 +47,7 @@ fun PartClockGridDisplay(
     countX: Int,
     countY: Int,
     modifier: Modifier = Modifier,
+    shouldAnimate: Boolean = true,
     reportPosition: (Int, Offset) -> Unit = { _, _ -> }
 ) {
     BoxWithConstraints(modifier) {
@@ -57,7 +60,7 @@ fun PartClockGridDisplay(
                     (0 until countX).forEach { column ->
                         val index = (row * countX) + column
                         val partClock = partClocks[index]
-                        PartClock(partClock.first, partClock.second,
+                        PartClock(partClock.first, partClock.second, shouldAnimate,
                             modifier = Modifier
                                 .size(clockSize)
                                 .onGloballyPositioned { coordinates ->
@@ -75,29 +78,44 @@ fun PartClockGridDisplay(
 fun PartClock(
     hourHand: Int,
     minuteHand: Int,
+    shouldAnimate: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     PartClock(
         hourHand.toClockHourDegree(),
         minuteHand.toClockMinuteDegree(),
+        shouldAnimate,
         modifier
     )
 }
+
+private val Float.Companion.DegreeConverter
+    get() = TwoWayConverter<Float, AnimationVector2D>({
+        val rad = Math.toRadians(it.toDouble())
+        val v1 = sin(rad).toFloat()
+        val v2 = cos(rad).toFloat()
+        AnimationVector2D(v1, v2)
+    }, {
+        Math.toDegrees(atan2(it.v1, it.v2).toDouble()).toFloat()
+    })
 
 @Composable
 fun PartClock(
     hourHandDegree: Float = 225f,
     minuteHandDegree: Float = 225f,
+    shouldAnimate: Boolean = true,
     modifier: Modifier = Modifier
 ) {
-    /*val hourDegree by animateFloatAsState(
-        hourHand,
-        tween(durationMillis = duration, easing = FastOutSlowInEasing)
+
+    val hourDegree = animateValueAsState(
+        hourHandDegree, Float.DegreeConverter,
+        tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
     )
-    val minuteDegree by animateFloatAsState(
-        minuteHand,
-        tween(durationMillis = duration, easing = FastOutSlowInEasing)
-    )*/
+
+    val minuteDegree = animateValueAsState(
+        minuteHandDegree, Float.DegreeConverter,
+        tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
+    )
 
     Canvas(
         modifier = modifier
@@ -125,8 +143,8 @@ fun PartClock(
         drawClockFace(radius)
         drawMinuteIndicators(minuteIndicatorColor, minuteIndicatorLength, minuteIndicatorHandWidth, indicatorOffset)
         drawHourIndicators(hourIndicatorColor, hourIndicatorLength,  hourIndicatorHandWidth, indicatorOffset)
-        drawHand(hourHandDegree, hourHandLength, handColor, handWidth)
-        drawHand(minuteHandDegree, minuteHandLength, handColor, handWidth)
+        drawHand(hourDegree.value, hourHandLength, handColor, handWidth)
+        drawHand(minuteDegree.value, minuteHandLength, handColor, handWidth)
         drawClockHandCenter(handColor, handWidth / 2)
         drawClockShadow(shadowColor, radius, shadowDepth)
         drawClockFrame(radius, frameWidth, outlineWidth)

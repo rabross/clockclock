@@ -33,8 +33,8 @@ private const val AT_REST = 225f
 
 class MainActivity : ComponentActivity() {
 
-    private val rows = 11
-    private val columns = 6
+    private val rows = 9
+    private val columns = 4
     private val clockCount = rows * columns
 
     @ExperimentalTime
@@ -59,6 +59,8 @@ class MainActivity : ComponentActivity() {
             val minute = remember { mutableStateOf(-1) }
             val second = remember { mutableStateOf(-1) }
 
+            val isDragging = remember { mutableStateOf(false) }
+
             Surface(
                 modifier = Modifier
                     .background(color = Color.White)
@@ -72,6 +74,7 @@ class MainActivity : ComponentActivity() {
 
                         detectDragGestures(
                             onDragStart = {
+                                isDragging.value = true
                                 timeAnimation?.cancel()
                                 offsetX = it.x
                                 offsetY = it.y
@@ -92,6 +95,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             onDragEnd = {
+                                isDragging.value = false
                                 runTimeAnimation(hour, minute, second)
                                 //runIdleAnimations(clocks)
                             }
@@ -109,17 +113,17 @@ class MainActivity : ComponentActivity() {
 
                     val temp = clocks.value.toMutableList()
 
-                    temp.insert(columns, Number.map(digitsHour.first).partClocks, numWidth, numWidth + 1, 1)
-                    temp.insert(columns, Number.map(digitsHour.second).partClocks, numWidth, 1, 1)
-                    temp.insert(columns, Number.map(digitsMinute.first).partClocks, numWidth, numWidth + 1, numHeight + 1)
-                    temp.insert(columns, Number.map(digitsMinute.second).partClocks, numWidth, 1, numHeight + 1)
-                    temp.insert(columns, Number.map(digitsSecond.first).partClocks, numWidth, numWidth + 1, numHeight * 2 + 1)
-                    temp.insert(columns, Number.map(digitsSecond.second).partClocks, numWidth, 1, numHeight * 2 + 1)
+                    temp.insert(columns, Number.map(digitsHour.first).partClocks, numWidth, numWidth, 0)
+                    temp.insert(columns, Number.map(digitsHour.second).partClocks, numWidth, 0, 0)
+                    temp.insert(columns, Number.map(digitsMinute.first).partClocks, numWidth, numWidth, numHeight)
+                    temp.insert(columns, Number.map(digitsMinute.second).partClocks, numWidth, 0, numHeight)
+                    temp.insert(columns, Number.map(digitsSecond.first).partClocks, numWidth, numWidth, numHeight * 2)
+                    temp.insert(columns, Number.map(digitsSecond.second).partClocks, numWidth, 0, numHeight * 2)
 
                     clocks.value = temp
                 }
 
-                PartClockGridDisplay(clocks.value, columns, rows) { index, offset ->
+                PartClockGridDisplay(clocks.value, columns, rows, shouldAnimate = !isDragging.value) { index, offset ->
                     offsetMap[index] = offset
                 }
             }
