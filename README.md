@@ -2,7 +2,7 @@
 
 # clockclock
 
-A [Jetpack Compose](https://developer.android.com/jetpack/compose) (WIP) project
+An art project to mess around with [Jetpack Compose](https://developer.android.com/jetpack/compose)
 
 <img width="240" src="https://user-images.githubusercontent.com/3681815/130622930-0baf39cb-c42a-4494-b234-7c2c93dc2710.gif">
 
