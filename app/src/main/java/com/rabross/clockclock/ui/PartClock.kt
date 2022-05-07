@@ -22,7 +22,7 @@ import kotlin.math.*
 @Composable
 private fun PartClockPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
-        PartClock(randomAngle, randomAngle, false, Modifier)
+        PartClock(randomAngle, randomAngle, Modifier)
     }
 }
 
@@ -60,7 +60,20 @@ fun PartClockGridDisplay(
                     (0 until countX).forEach { column ->
                         val index = (row * countX) + column
                         val partClock = partClocks[index]
-                        PartClock(partClock.first, partClock.second, shouldAnimate,
+                        val hourHandDegree = partClock.first
+                        val minuteHandDegree = partClock.second
+
+                        val hourDegree = animateValueAsState(
+                            hourHandDegree, Float.DegreeConverter,
+                            tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
+                        )
+
+                        val minuteDegree = animateValueAsState(
+                            minuteHandDegree, Float.DegreeConverter,
+                            tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
+                        )
+
+                        PartClock(hourDegree.value, minuteDegree.value,
                             modifier = Modifier
                                 .size(clockSize)
                                 .onGloballyPositioned { coordinates ->
@@ -78,13 +91,11 @@ fun PartClockGridDisplay(
 fun PartClock(
     hourHand: Int,
     minuteHand: Int,
-    shouldAnimate: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     PartClock(
         hourHand.toClockHourDegree(),
         minuteHand.toClockMinuteDegree(),
-        shouldAnimate,
         modifier
     )
 }
@@ -103,20 +114,8 @@ private val Float.Companion.DegreeConverter
 fun PartClock(
     hourHandDegree: Float = 225f,
     minuteHandDegree: Float = 225f,
-    shouldAnimate: Boolean = true,
     modifier: Modifier = Modifier
 ) {
-
-    val hourDegree = animateValueAsState(
-        hourHandDegree, Float.DegreeConverter,
-        tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
-    )
-
-    val minuteDegree = animateValueAsState(
-        minuteHandDegree, Float.DegreeConverter,
-        tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
-    )
-
     Canvas(
         modifier = modifier
             .aspectRatio(1f)
@@ -143,8 +142,8 @@ fun PartClock(
         drawClockFace(radius)
         drawMinuteIndicators(minuteIndicatorColor, minuteIndicatorLength, minuteIndicatorHandWidth, indicatorOffset)
         drawHourIndicators(hourIndicatorColor, hourIndicatorLength,  hourIndicatorHandWidth, indicatorOffset)
-        drawHand(hourDegree.value, hourHandLength, handColor, handWidth)
-        drawHand(minuteDegree.value, minuteHandLength, handColor, handWidth)
+        drawHand(hourHandDegree, hourHandLength, handColor, handWidth)
+        drawHand(minuteHandDegree, minuteHandLength, handColor, handWidth)
         drawClockHandCenter(handColor, handWidth / 2)
         drawClockShadow(shadowColor, radius, shadowDepth)
         drawClockFrame(radius, frameWidth, outlineWidth)
