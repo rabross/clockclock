@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -15,14 +16,15 @@ import androidx.compose.ui.graphics.withSave
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import kotlin.math.*
 
 @Preview
 @Composable
 private fun PartClockPreview() {
     Surface(modifier = Modifier.background(color = Color.White)) {
-        PartClock(randomAngle, randomAngle, Modifier)
+        val hour = remember { Math.random().toFloat() * 360f }
+        val minute = remember { Math.random().toFloat() * 360f }
+        PartClock(hour, minute, Modifier)
     }
 }
 
@@ -64,12 +66,12 @@ fun PartClockGridDisplay(
                         val minuteHandDegree = partClock.second
 
                         val hourDegree = animateValueAsState(
-                            hourHandDegree, Float.DegreeConverter,
+                            hourHandDegree, CircleConverter(clockSize.value),
                             tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
                         )
 
                         val minuteDegree = animateValueAsState(
-                            minuteHandDegree, Float.DegreeConverter,
+                            minuteHandDegree, CircleConverter(clockSize.value),
                             tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
                         )
 
@@ -109,6 +111,34 @@ private val Float.Companion.DegreeConverter
     }, {
         Math.toDegrees(atan2(it.v1, it.v2).toDouble()).toFloat()
     })
+
+//todo normalise to clock
+private class CircleConverter(private val r: Float) : TwoWayConverter<Float, AnimationVector2D> {
+
+    override val convertFromVector: (AnimationVector2D) -> Float
+        get() = {
+            val x = it.v1
+            val y = it.v2
+            coordsToAngle(x, y, r)
+        }
+    override val convertToVector: (Float) -> AnimationVector2D
+        get() = {
+            val coords = angleToCoords(it, r)
+            AnimationVector2D(coords.first, coords.second)
+        }
+
+    private fun coordsToAngle(x: Float, y: Float, r: Float) =
+        Math.toDegrees(acos((x.sqr() + y.sqr() - r.sqr())/2 * x * y).toDouble()).toFloat()
+
+    private fun angleToCoords(angle: Float, r: Float): Pair<Float, Float> {
+        val rad = Math.toRadians(angle.toDouble() % 360)
+        val x = if(angle == 180f) 0f else r * sin(rad)
+        val y = if(angle == 90f || angle == 270f) 0f else r * cos(rad)
+        return x.toFloat() to y.toFloat()
+    }
+
+    private fun Float.sqr() = pow(2f)
+}
 
 @Composable
 fun PartClock(
@@ -219,3 +249,5 @@ private fun DrawScope.drawHand(
 private fun Int.toClockHourDegree() = this * 360f / 12
 
 private fun Int.toClockMinuteDegree() = this * 360f / 60
+
+data class ClockTime(val hour: Float, val minute: Float)

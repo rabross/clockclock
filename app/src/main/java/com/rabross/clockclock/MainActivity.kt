@@ -66,12 +66,6 @@ class MainActivity : ComponentActivity() {
                     .background(color = Color.White)
                     .fillMaxWidth()
                     .pointerInput(Unit) {
-
-                        /*detectTapGestures {
-                            offsetX = it.x
-                            offsetY = it.y
-                        }*/
-
                         detectDragGestures(
                             onDragStart = {
                                 isDragging.value = true
