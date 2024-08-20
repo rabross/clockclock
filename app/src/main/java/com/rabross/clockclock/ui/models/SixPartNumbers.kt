@@ -10,48 +10,64 @@ sealed class Number(val partClocks: SixPartClock) {
         BLANK, BLANK,
         BLANK, BLANK))
     object Zero : Number(arrayOf(
-        90f to 180f, 270f to 180f,
-        0f to 180f, 180f to 0f,
-        0f to 90f, 0f to 270f))
+        SECOND_QUAD, THIRD_QUAD,
+        VERTICAL, VERTICAL,
+        FIRST_QUAD, FOURTH_QUAD))
     object One : Number(arrayOf(
-        BLANK, 180f to 180f,
-        BLANK, 0f to 180f,
-        BLANK, 0f to 0f))
+        BLANK, BOTTOM_VERTICAL,
+        BLANK, VERTICAL,
+        BLANK, TOP_VERTICAL))
     object Two : Number(arrayOf(
-        90f to 90f, 270f to 180f,
-        180f to 90f, 0f to 270f,
-        0f to 90f, 270f to 270f))
+        END_HORIZONTAL, THIRD_QUAD,
+        SECOND_QUAD, FOURTH_QUAD,
+        FIRST_QUAD, START_HORIZONTAL))
     object Three : Number(arrayOf(
-        90f to 90f, 270f to 180f,
-        90f to 90f, 0f to 270f,
-        90f to 90f, 0f to 270f))
+        END_HORIZONTAL, THIRD_QUAD,
+        END_HORIZONTAL, FOURTH_QUAD,
+        END_HORIZONTAL, FOURTH_QUAD))
     object Four : Number(arrayOf(
-        180f to 180f, 180f to 180f,
-        0f to 90f, 0f to 180f,
-        BLANK, 0f to 0f))
+        BOTTOM_VERTICAL, BOTTOM_VERTICAL,
+        FIRST_QUAD, VERTICAL,
+        BLANK, TOP_VERTICAL))
     object Five : Number(arrayOf(
-        90f to 180f, 270f to 270f,
-        0f to 90f, 180f to 270f,
-        90f to 90f, 0f to 270f))
+        SECOND_QUAD, START_HORIZONTAL,
+        FIRST_QUAD, THIRD_QUAD,
+        END_HORIZONTAL, FOURTH_QUAD))
     object Six : Number(arrayOf(
-        180f to 90f, 270f to 270f,
-        0f to 180f, 270f to 180f,
-        0f to 90f, 0f to 270f))
+        SECOND_QUAD, START_HORIZONTAL,
+       VERTICAL, THIRD_QUAD,
+        FIRST_QUAD, FOURTH_QUAD))
     object Seven : Number(arrayOf(
-        90f to 90f, 270f to 180f,
-        BLANK, 180f to 0f,
-        BLANK, 0f to 0f))
+        END_HORIZONTAL, THIRD_QUAD,
+        BLANK, VERTICAL,
+        BLANK, TOP_VERTICAL))
     object Eight : Number(arrayOf(
-        90f to 180f, 180f to 270f,
-        0f to 90f, 270f to 0f,
-        0f to 90f, 270f to 0f))
+        SECOND_QUAD, THIRD_QUAD,
+        FIRST_QUAD, FOURTH_QUAD,
+        FIRST_QUAD, FOURTH_QUAD))
     object Nine : Number(arrayOf(
-        90f to 180f, 270f to 180f,
-        0f to 90f, 0f to 180f,
-        90f to 90f, 270f to 0f))
+        SECOND_QUAD, THIRD_QUAD,
+        FIRST_QUAD, VERTICAL,
+        END_HORIZONTAL, FOURTH_QUAD))
 
     companion object {
         private val BLANK = 225f to 225f
+        private val FIRST_QUAD = 0f to 90f
+        private val SECOND_QUAD = 90f to 180f
+        private val THIRD_QUAD = 180f to 270f
+        private val FOURTH_QUAD = 270f to 0f
+        private val VERTICAL = 0f to 180f
+        private val HORIZONTAL = 90f to 270f
+        private val TOP_VERTICAL = 0f to 0f
+        private val BOTTOM_VERTICAL = 180f to 180f
+        private val START_HORIZONTAL = 270f to 270f
+        private val END_HORIZONTAL = 90f to 90f
+        private val FIRST_QUAD_INVERSE = 90f to 0f
+        private val SECOND_QUAD_INVERSE = 180f to 90f
+        private val THIRD_QUAD_INVERSE = 270f to 180f
+        private val FOURTH_QUAD_INVERSE = 0f to 270f
+        private val VERTICAL_INVERSE = 180f to 0f
+        private val HORIZONTAL_INVERSE = 270f to 90f
 
         fun map(number: Int): Number {
             return when(number){
