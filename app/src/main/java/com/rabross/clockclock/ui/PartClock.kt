@@ -6,6 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -63,14 +68,30 @@ fun PartClockGridDisplay(
                         val hourHandDegree = partClock.first
                         val minuteHandDegree = partClock.second
 
-                        val hourDegree = animateValueAsState(
-                            hourHandDegree, Float.DegreeConverter,
-                            tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
+//                        val hourDegree = animateValueAsState(
+//                            hourHandDegree, Float.DegreeConverter,
+//                            tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
+//                        )
+//
+//                        val minuteDegree = animateValueAsState(
+//                            minuteHandDegree, Float.DegreeConverter,
+//                            tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
+//                        )
+
+                        val hourDegree = animateFloatAsState(
+                            targetValue = rememberShortestPathDegree(hourHandDegree),
+                            animationSpec = tween(
+                                durationMillis = if (shouldAnimate) 800 else 100,
+                                easing = if (shouldAnimate) FastOutSlowInEasing else LinearEasing
+                            )
                         )
 
-                        val minuteDegree = animateValueAsState(
-                            minuteHandDegree, Float.DegreeConverter,
-                            tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
+                        val minuteDegree = animateFloatAsState(
+                            targetValue = rememberShortestPathDegree(minuteHandDegree),
+                            animationSpec = tween(
+                                durationMillis = if (shouldAnimate) 800 else 100,
+                                easing = if (shouldAnimate) FastOutSlowInEasing else LinearEasing
+                            )
                         )
 
                         PartClock(hourDegree.value, minuteDegree.value,
@@ -109,6 +130,24 @@ private val Float.Companion.DegreeConverter
     }, {
         Math.toDegrees(atan2(it.v1, it.v2).toDouble()).toFloat()
     })
+
+@Composable
+fun rememberShortestPathDegree(target: Float): Float {
+    var accumulated by remember { mutableStateOf(target) }
+
+    LaunchedEffect(target) {
+        val diff = (target - accumulated) % 360f
+        // Normalize the difference to [-180, 180]
+        val shortestDiff = when {
+            diff > 180f -> diff - 360f
+            diff < -180f -> diff + 360f
+            else -> diff
+        }
+        accumulated += shortestDiff
+    }
+
+    return accumulated
+}
 
 @Composable
 fun PartClock(

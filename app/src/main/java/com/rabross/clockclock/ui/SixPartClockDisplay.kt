@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -18,6 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import java.util.*
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 @Composable
@@ -194,17 +196,19 @@ private fun SixPartClockTimePreview() {
         val minute = remember { mutableStateOf(-1) }
         val second = remember { mutableStateOf(-1) }
 
-        tickerFlow(Duration.seconds(1), Duration.seconds(1))
-            .map { Calendar.getInstance() }
-            .distinctUntilChanged { old, new ->
-                old.get(Calendar.SECOND) == new.get(Calendar.SECOND)
-            }
-            .onEach { calendar ->
-                hour.value = calendar.get(Calendar.HOUR_OF_DAY)
-                minute.value = calendar.get(Calendar.MINUTE)
-                second.value = calendar.get(Calendar.SECOND)
-            }
-            .launchIn(CoroutineScope(Dispatchers.IO))
+        LaunchedEffect(Unit) {
+            tickerFlow(1.seconds, 1.seconds)
+                .map { Calendar.getInstance() }
+                .distinctUntilChanged { old, new ->
+                    old.get(Calendar.SECOND) == new.get(Calendar.SECOND)
+                }
+                .onEach { calendar ->
+                    hour.value = calendar.get(Calendar.HOUR_OF_DAY)
+                    minute.value = calendar.get(Calendar.MINUTE)
+                    second.value = calendar.get(Calendar.SECOND)
+                }
+                .launchIn(this)
+        }
 
         BoxWithConstraints {
             val sixClockWidth = this.maxWidth / 2

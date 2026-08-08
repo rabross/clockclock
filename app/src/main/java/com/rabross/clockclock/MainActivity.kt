@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.onEach
 import java.util.*
 import kotlin.math.atan2
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import com.rabross.clockclock.ui.models.Number
 
@@ -128,7 +130,9 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            runTimeAnimation(hour, minute, second)
+            LaunchedEffect(Unit) {
+                runTimeAnimation(hour, minute, second)
+            }
         }
         //}
     }
@@ -163,8 +167,8 @@ class MainActivity : ComponentActivity() {
     private val animations = listOf(animDiff, animOpposite)
 
     @ExperimentalTime
-    private fun startTicker(startDelay: Duration = Duration.seconds(1), onTick: () -> Unit): Job {
-        return tickerFlow(Duration.milliseconds(1), startDelay)
+    private fun startTicker(startDelay: Duration = 1.seconds, onTick: () -> Unit): Job {
+        return tickerFlow(1.milliseconds, startDelay)
             .onEach { onTick() }
             .launchIn(CoroutineScope(Dispatchers.IO))
     }
@@ -174,7 +178,7 @@ class MainActivity : ComponentActivity() {
         timeAnimation?.cancel()
         idleAnimtion?.cancel()
         val anim = animations.random()
-        idleAnimtion = startTicker(Duration.seconds(1)) {
+        idleAnimtion = startTicker(1.seconds) {
             clocks.forEach(anim)
         }
     }
@@ -187,7 +191,7 @@ class MainActivity : ComponentActivity() {
     ) {
         idleAnimtion?.cancel()
         timeAnimation?.cancel()
-        timeAnimation = tickerFlow(Duration.milliseconds(500))
+        timeAnimation = tickerFlow(500.milliseconds)
             .map { Calendar.getInstance() }
             .distinctUntilChanged { old, new ->
                 old.get(Calendar.SECOND) == new.get(Calendar.SECOND)
