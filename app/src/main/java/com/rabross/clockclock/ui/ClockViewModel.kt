@@ -23,10 +23,9 @@ class ClockViewModel : ViewModel() {
     private val rows = 9
     private val columns = 4
     private val clockCount = rows * columns
-    private val atRest = 225f
     private val clockUpdatePeriod = 500.milliseconds
 
-    private val _clocks = mutableStateOf(List(clockCount) { atRest to atRest })
+    private val _clocks = mutableStateOf(List(clockCount) { 0f to 0f })
     val clocks: State<List<Pair<Float, Float>>> = _clocks
 
     private val _hour = mutableIntStateOf(-1)
@@ -93,7 +92,7 @@ class ClockViewModel : ViewModel() {
         val digitsMinute = _minute.intValue.twoRightMostDigits()
         val digitsSecond = _second.intValue.twoRightMostDigits()
 
-        val temp = MutableList(clockCount) { atRest to atRest }
+        val temp = MutableList(clockCount) { 0f to 0f }
         val numWidth = 2
         val numHeight = 3
 
