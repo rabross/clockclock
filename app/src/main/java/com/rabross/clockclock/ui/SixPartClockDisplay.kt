@@ -1,6 +1,5 @@
 package com.rabross.clockclock.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -9,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Surface
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
@@ -87,7 +86,7 @@ private inline fun <reified T> Pair<T, T>.reverseMap(block: (value: T) -> Unit) 
 @Preview
 @Composable
 private fun SixPartClockPreview() {
-    Surface(modifier = Modifier.background(color = Color.White)) {
+    Surface {
         SixPartClockDisplay(
             arrayOf(
                 randomAngle to randomAngle, randomAngle to randomAngle,
@@ -102,7 +101,7 @@ private fun SixPartClockPreview() {
 @Preview
 @Composable
 private fun OnetoNinePreview() {
-    Surface(modifier = Modifier.background(color = Color.White)) {
+    Surface {
         BoxWithConstraints {
             val clockWidth = this.maxWidth / 3
             val clockHeight = this.maxHeight / 3
@@ -170,9 +169,7 @@ private fun OnetoNinePreview() {
 @Composable
 private fun SixPartClockTimePreview() {
     Surface(
-        modifier = Modifier
-            .background(color = Color.White)
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
 
         val hour = remember { mutableIntStateOf(-1) }

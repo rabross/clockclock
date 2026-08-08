@@ -1,17 +1,12 @@
 package com.rabross.clockclock.ui
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Surface
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -20,13 +15,11 @@ import androidx.compose.ui.graphics.withSave
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import kotlin.math.*
 
 @Preview
 @Composable
 private fun PartClockPreview() {
-    Surface(modifier = Modifier.background(color = Color.White)) {
+    Surface {
         PartClock(randomAngle, randomAngle, Modifier)
     }
 }
@@ -40,28 +33,28 @@ fun PartClockGridDisplay(
     shouldAnimate: Boolean = true,
     reportPosition: (Int, Offset) -> Unit = { _, _ -> }
 ) {
-    BoxWithConstraints(modifier) {
+    BoxWithConstraints(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
         val clockWidth = this.maxWidth / countX
         val clockHeight = this.maxHeight / countY
         val clockSize = clockWidth.coerceAtMost(clockHeight)
-        Column(verticalArrangement = Arrangement.SpaceEvenly) {
-            (0 until countY).forEach { row ->
-                Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                    (0 until countX).forEach { column ->
+        Column(
+            modifier = Modifier.wrapContentSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            repeat(countY) { row ->
+                Row(
+                    modifier = Modifier.wrapContentSize(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(countX) { column ->
                         val index = (row * countX) + column
                         val partClock = partClocks[index]
                         val hourHandDegree = partClock.first
                         val minuteHandDegree = partClock.second
-
-//                        val hourDegree = animateValueAsState(
-//                            hourHandDegree, Float.DegreeConverter,
-//                            tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
-//                        )
-//
-//                        val minuteDegree = animateValueAsState(
-//                            minuteHandDegree, Float.DegreeConverter,
-//                            tween(durationMillis = if(shouldAnimate) 800 else 100, easing = if(shouldAnimate) FastOutSlowInEasing else LinearEasing)
-//                        )
 
                         val hourDegree = animateFloatAsState(
                             targetValue = rememberShortestPathDegree(hourHandDegree),
@@ -79,7 +72,9 @@ fun PartClockGridDisplay(
                             )
                         )
 
-                        PartClock(hourDegree.value, minuteDegree.value,
+                        PartClock(
+                            hourHandDegree = hourDegree.value,
+                            minuteHandDegree = minuteDegree.value,
                             modifier = Modifier
                                 .size(clockSize)
                                 .onGloballyPositioned { coordinates ->
@@ -112,66 +107,70 @@ fun PartClock(
     minuteHandDegree: Float = 225f,
     modifier: Modifier = Modifier
 ) {
-    Canvas(
+    val handColor = Color(0xFF242424)
+    val minuteIndicatorColor = Color(0xFFEEEEEE)
+    val hourIndicatorColor = Color(0xFFDDDDDD)
+    val shadowColor = Color(0x33000000)
+
+    Spacer(
         modifier = modifier
             .aspectRatio(1f)
-    ) {
-        val handColor = Color(0xFF242424)
-        val minuteIndicatorColor = Color(0xFFEEEEEE)
-        val hourIndicatorColor = Color(0xFFDDDDDD)
-        val shadowColor = Color(0x33000000)
-        val center = size.minDimension / 2.0f
-        val borderWidth = center / 10
-        val radius = center - borderWidth
-        val handWidth = radius / 5
-        val frameWidth = handWidth / 2
-        val hourIndicatorLength = (radius - borderWidth)/5
-        val minuteIndicatorLength = hourIndicatorLength/4
-        val hourIndicatorHandWidth = radius * 0.02f
-        val minuteIndicatorHandWidth = hourIndicatorHandWidth / 2
-        val outlineWidth = minuteIndicatorHandWidth / 2
-        val minuteHandLength = radius - frameWidth / 2 - outlineWidth
-        val hourHandLength = minuteHandLength - hourIndicatorLength * 2/3
-        val indicatorOffset = borderWidth + frameWidth/2 + hourIndicatorHandWidth
-        val shadowDepth = borderWidth / 2
+            .drawWithCache {
+                val centerPoint = this.size.minDimension / 2.0f
+                val borderWidth = centerPoint / 10
+                val radius = centerPoint - borderWidth
+                val handWidth = radius / 5
+                val frameWidth = handWidth / 2
+                val hourIndicatorLength = (radius - borderWidth) / 5
+                val minuteIndicatorLength = hourIndicatorLength / 4
+                val hourIndicatorHandWidth = radius * 0.02f
+                val minuteIndicatorHandWidth = hourIndicatorHandWidth / 2
+                val outlineWidth = minuteIndicatorHandWidth / 2
+                val minuteHandLength = radius - frameWidth / 2 - outlineWidth
+                val hourHandLength = minuteHandLength - hourIndicatorLength * 2f / 3f
+                val indicatorOffset = borderWidth + frameWidth / 2 + hourIndicatorHandWidth
+                val shadowDepth = borderWidth / 2
 
-        drawClockFace(radius)
-        drawMinuteIndicators(minuteIndicatorColor, minuteIndicatorLength, minuteIndicatorHandWidth, indicatorOffset)
-        drawHourIndicators(hourIndicatorColor, hourIndicatorLength,  hourIndicatorHandWidth, indicatorOffset)
-        drawHand(hourHandDegree, hourHandLength, handColor, handWidth)
-        drawHand(minuteHandDegree, minuteHandLength, handColor, handWidth)
-        drawClockHandCenter(handColor, handWidth / 2)
-        drawClockShadow(shadowColor, radius, shadowDepth)
-        drawClockFrame(radius, frameWidth, outlineWidth)
-    }
+                onDrawBehind {
+                    drawClockFace(radius)
+                    drawMinuteIndicators(minuteIndicatorColor, minuteIndicatorLength, minuteIndicatorHandWidth, indicatorOffset)
+                    drawHourIndicators(hourIndicatorColor, hourIndicatorLength, hourIndicatorHandWidth, indicatorOffset)
+                    drawHand(hourHandDegree, hourHandLength, handColor, handWidth)
+                    drawHand(minuteHandDegree, minuteHandLength, handColor, handWidth)
+                    drawClockHandCenter(handColor, handWidth / 2)
+                    drawClockShadow(shadowColor, radius, shadowDepth)
+                    drawClockFrame(radius, frameWidth, outlineWidth)
+                }
+            }
+    )
 }
 
-private fun DrawScope.drawClockHandCenter(color: Color, radius: Float){
+private fun DrawScope.drawClockHandCenter(color: Color, radius: Float) {
     drawCircle(color, radius)
-    drawCircle(color = Color.Black, radius = radius/3, style = Stroke(4f))
+    drawCircle(color = Color.Black, radius = radius / 3, style = Stroke(4f))
 }
 
-private fun DrawScope.drawClockShadow(color: Color, radius: Float, depth: Float){
-    drawCircle(color, radius = radius, center = center.copy(y = center.y + depth),style = Stroke(depth * 2))
+private fun DrawScope.drawClockShadow(color: Color, radius: Float, depth: Float) {
+    drawCircle(color, radius = radius, center = center.copy(y = center.y + depth), style = Stroke(depth * 2))
 }
 
-private fun DrawScope.drawClockFace(radius: Float){
+private fun DrawScope.drawClockFace(radius: Float) {
     drawCircle(Color.White, radius = radius)
 }
 
-private fun DrawScope.drawClockFrame(radius: Float, frameWidth: Float, outlineWidth: Float){
+private fun DrawScope.drawClockFrame(radius: Float, frameWidth: Float, outlineWidth: Float) {
     drawCircle(Color.White, radius = radius, style = Stroke(frameWidth))
-    drawCircle(Color.LightGray, radius = radius - frameWidth/2, style = Stroke(outlineWidth))
-    drawCircle(Color.LightGray, radius = radius + frameWidth/2, style = Stroke(outlineWidth))
+    drawCircle(Color.LightGray, radius = radius - frameWidth / 2, style = Stroke(outlineWidth))
+    drawCircle(Color.LightGray, radius = radius + frameWidth / 2, style = Stroke(outlineWidth))
 }
 
-private fun DrawScope.drawHourIndicators(color: Color, length: Float, width: Float, offset: Float){
+private fun DrawScope.drawHourIndicators(color: Color, length: Float, width: Float, offset: Float) {
     for (i in 0..330 step 30) {
         drawIndicator(i.toFloat(), length, color, width, offset)
     }
 }
 
-private fun DrawScope.drawMinuteIndicators(color: Color, length: Float, width: Float, offset: Float){
+private fun DrawScope.drawMinuteIndicators(color: Color, length: Float, width: Float, offset: Float) {
     for (i in 0..354 step 6) {
         drawIndicator(i.toFloat(), length, color, width, offset)
     }
