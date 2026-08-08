@@ -5,47 +5,57 @@ typealias SixPartClock = Array<PartClock>
 
 sealed class Number(val partClocks: SixPartClock) {
 
-    object Blank : Number(arrayOf(
+    data object Blank : Number(arrayOf(
         BLANK, BLANK,
         BLANK, BLANK,
         BLANK, BLANK))
-    object Zero : Number(arrayOf(
+
+    data object Zero : Number(arrayOf(
         SECOND_QUAD, THIRD_QUAD,
         VERTICAL, VERTICAL,
         FIRST_QUAD, FOURTH_QUAD))
-    object One : Number(arrayOf(
+
+    data object One : Number(arrayOf(
         BLANK, BOTTOM_VERTICAL,
         BLANK, VERTICAL,
         BLANK, TOP_VERTICAL))
-    object Two : Number(arrayOf(
+
+    data object Two : Number(arrayOf(
         END_HORIZONTAL, THIRD_QUAD,
         SECOND_QUAD, FOURTH_QUAD,
         FIRST_QUAD, START_HORIZONTAL))
-    object Three : Number(arrayOf(
+
+    data object Three : Number(arrayOf(
         END_HORIZONTAL, THIRD_QUAD,
         END_HORIZONTAL, FOURTH_QUAD,
         END_HORIZONTAL, FOURTH_QUAD))
-    object Four : Number(arrayOf(
+
+    data object Four : Number(arrayOf(
         BOTTOM_VERTICAL, BOTTOM_VERTICAL,
         FIRST_QUAD, VERTICAL,
         BLANK, TOP_VERTICAL))
-    object Five : Number(arrayOf(
+
+    data object Five : Number(arrayOf(
         SECOND_QUAD, START_HORIZONTAL,
         FIRST_QUAD, THIRD_QUAD,
         END_HORIZONTAL, FOURTH_QUAD))
-    object Six : Number(arrayOf(
+
+    data object Six : Number(arrayOf(
         SECOND_QUAD, START_HORIZONTAL,
-       VERTICAL, THIRD_QUAD,
+        VERTICAL, THIRD_QUAD,
         FIRST_QUAD, FOURTH_QUAD))
-    object Seven : Number(arrayOf(
+
+    data object Seven : Number(arrayOf(
         END_HORIZONTAL, THIRD_QUAD,
         BLANK, VERTICAL,
         BLANK, TOP_VERTICAL))
-    object Eight : Number(arrayOf(
+
+    data object Eight : Number(arrayOf(
         SECOND_QUAD, THIRD_QUAD,
         FIRST_QUAD, FOURTH_QUAD,
         FIRST_QUAD, FOURTH_QUAD))
-    object Nine : Number(arrayOf(
+
+    data object Nine : Number(arrayOf(
         SECOND_QUAD, THIRD_QUAD,
         FIRST_QUAD, VERTICAL,
         END_HORIZONTAL, FOURTH_QUAD))
@@ -70,7 +80,7 @@ sealed class Number(val partClocks: SixPartClock) {
         private val HORIZONTAL_INVERSE = 270f to 90f
 
         fun map(number: Int): Number {
-            return when(number){
+            return when (number) {
                 1 -> One
                 2 -> Two
                 3 -> Three

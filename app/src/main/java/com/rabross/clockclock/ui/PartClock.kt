@@ -31,21 +31,6 @@ private fun PartClockPreview() {
     }
 }
 
-/*@Preview
-@Composable
-private fun PartClockGridDisplayPreview() {
-    val clocks = listOf(
-        randomAngle to randomAngle, randomAngle to randomAngle,
-        randomAngle to randomAngle, randomAngle to randomAngle,
-        randomAngle to randomAngle, randomAngle to randomAngle,
-        randomAngle to randomAngle, randomAngle to randomAngle
-    )
-
-    Surface(modifier = Modifier.background(color = Color.White)) {
-        PartClockGridDisplay(clocks, 2, 4)
-    }
-}*/
-
 @Composable
 fun PartClockGridDisplay(
     partClocks: List<Pair<Float, Float>>,
@@ -119,34 +104,6 @@ fun PartClock(
         minuteHand.toClockMinuteDegree(),
         modifier
     )
-}
-
-private val Float.Companion.DegreeConverter
-    get() = TwoWayConverter<Float, AnimationVector2D>({
-        val rad = Math.toRadians(it.toDouble())
-        val v1 = sin(rad).toFloat()
-        val v2 = cos(rad).toFloat()
-        AnimationVector2D(v1, v2)
-    }, {
-        Math.toDegrees(atan2(it.v1, it.v2).toDouble()).toFloat()
-    })
-
-@Composable
-fun rememberShortestPathDegree(target: Float): Float {
-    var accumulated by remember { mutableStateOf(target) }
-
-    LaunchedEffect(target) {
-        val diff = (target - accumulated) % 360f
-        // Normalize the difference to [-180, 180]
-        val shortestDiff = when {
-            diff > 180f -> diff - 360f
-            diff < -180f -> diff + 360f
-            else -> diff
-        }
-        accumulated += shortestDiff
-    }
-
-    return accumulated
 }
 
 @Composable

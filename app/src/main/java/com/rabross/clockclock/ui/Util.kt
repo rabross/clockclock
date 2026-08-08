@@ -1,5 +1,12 @@
 package com.rabross.clockclock.ui
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
@@ -29,4 +36,22 @@ fun Int.twoRightMostDigits(): Pair<Int, Int> {
             firstDigit to secondDigit
         }
     }
+}
+
+@Composable
+fun rememberShortestPathDegree(target: Float): Float {
+    var accumulated by remember { mutableFloatStateOf(target) }
+
+    LaunchedEffect(target) {
+        val diff = (target - accumulated) % 360f
+        // Normalize the difference to [-180, 180]
+        val shortestDiff = when {
+            diff > 180f -> diff - 360f
+            diff < -180f -> diff + 360f
+            else -> diff
+        }
+        accumulated += shortestDiff
+    }
+
+    return accumulated
 }

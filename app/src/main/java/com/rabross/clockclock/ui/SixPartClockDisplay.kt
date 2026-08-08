@@ -1,11 +1,18 @@
 package com.rabross.clockclock.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.requiredHeightIn
+import androidx.compose.foundation.layout.requiredWidthIn
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -13,12 +20,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rabross.clockclock.ui.models.Number
 import com.rabross.clockclock.ui.models.SixPartClock
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
-import java.util.*
-import kotlin.time.Duration
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import java.util.Calendar
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -29,7 +35,8 @@ fun SixPartClockDisplay(
 ) {
     SixPartClockDisplay(
         number.partClocks,
-        modifier)
+        modifier
+    )
 }
 
 @Composable
@@ -44,9 +51,9 @@ fun SixPartClockDisplay(
         val clockHeight = this.maxHeight / columnSize
         val clockSize = clockWidth.coerceAtMost(clockHeight)
         Column(verticalArrangement = Arrangement.SpaceEvenly) {
-            (0 until columnSize).forEach { row ->
+            repeat(columnSize) { row ->
                 Row(horizontalArrangement = Arrangement.SpaceEvenly) {
-                    (0 until rowSize).forEach { column ->
+                    repeat(rowSize) { column ->
                         val partClock = partClocks[(row * rowSize) + column]
                         PartClock(
                             partClock.first,
@@ -72,7 +79,7 @@ fun SixPartClockDisplayRow(modifier: Modifier = Modifier, digits: Pair<Int, Int>
     }
 }
 
-private inline fun <reified T> Pair<T,T>.reverseMap(block: (value: T) -> Unit){
+private inline fun <reified T> Pair<T, T>.reverseMap(block: (value: T) -> Unit) {
     block(second)
     block(first)
 }
@@ -85,7 +92,8 @@ private fun SixPartClockPreview() {
             arrayOf(
                 randomAngle to randomAngle, randomAngle to randomAngle,
                 randomAngle to randomAngle, randomAngle to randomAngle,
-                randomAngle to randomAngle, randomAngle to randomAngle),
+                randomAngle to randomAngle, randomAngle to randomAngle
+            ),
             Modifier
         )
     }
@@ -100,64 +108,37 @@ private fun OnetoNinePreview() {
             val clockHeight = this.maxHeight / 3
             Column(verticalArrangement = Arrangement.Top) {
                 Row(horizontalArrangement = Arrangement.Start) {
-                    SixPartClockDisplay(
-                        Number.One,
-                        Modifier
-                            .requiredWidthIn(0.dp, clockWidth)
-                            .requiredHeightIn(0.dp, clockHeight)
-                    )
-                    SixPartClockDisplay(
-                        Number.Two,
-                        Modifier
-                            .requiredWidthIn(0.dp, clockWidth)
-                            .requiredHeightIn(0.dp, clockHeight)
-                    )
-                    SixPartClockDisplay(
-                        Number.Three,
-                        Modifier
-                            .requiredWidthIn(0.dp, clockWidth)
-                            .requiredHeightIn(0.dp, clockHeight)
-                    )
+                    val numbers = listOf(Number.One, Number.Two, Number.Three)
+                    numbers.forEach {
+                        SixPartClockDisplay(
+                            it,
+                            Modifier
+                                .requiredWidthIn(0.dp, clockWidth)
+                                .requiredHeightIn(0.dp, clockHeight)
+                        )
+                    }
                 }
                 Row(horizontalArrangement = Arrangement.Start) {
-                    SixPartClockDisplay(
-                        Number.Four,
-                        Modifier
-                            .requiredWidthIn(0.dp, clockWidth)
-                            .requiredHeightIn(0.dp, clockHeight)
-                    )
-                    SixPartClockDisplay(
-                        Number.Five,
-                        Modifier
-                            .requiredWidthIn(0.dp, clockWidth)
-                            .requiredHeightIn(0.dp, clockHeight)
-                    )
-                    SixPartClockDisplay(
-                        Number.Six,
-                        Modifier
-                            .requiredWidthIn(0.dp, clockWidth)
-                            .requiredHeightIn(0.dp, clockHeight)
-                    )
+                    val numbers = listOf(Number.Four, Number.Five, Number.Six)
+                    numbers.forEach {
+                        SixPartClockDisplay(
+                            it,
+                            Modifier
+                                .requiredWidthIn(0.dp, clockWidth)
+                                .requiredHeightIn(0.dp, clockHeight)
+                        )
+                    }
                 }
                 Row(horizontalArrangement = Arrangement.Start) {
-                    SixPartClockDisplay(
-                        Number.Seven,
-                        Modifier
-                            .requiredWidthIn(0.dp, clockWidth)
-                            .requiredHeightIn(0.dp, clockHeight)
-                    )
-                    SixPartClockDisplay(
-                        Number.Eight,
-                        Modifier
-                            .requiredWidthIn(0.dp, clockWidth)
-                            .requiredHeightIn(0.dp, clockHeight)
-                    )
-                    SixPartClockDisplay(
-                        Number.Nine,
-                        Modifier
-                            .requiredWidthIn(0.dp, clockWidth)
-                            .requiredHeightIn(0.dp, clockHeight)
-                    )
+                    val numbers = listOf(Number.Seven, Number.Eight, Number.Nine)
+                    numbers.forEach {
+                        SixPartClockDisplay(
+                            it,
+                            Modifier
+                                .requiredWidthIn(0.dp, clockWidth)
+                                .requiredHeightIn(0.dp, clockHeight)
+                        )
+                    }
                 }
                 Row(horizontalArrangement = Arrangement.Start) {
                     SixPartClockDisplay(
@@ -188,13 +169,15 @@ private fun OnetoNinePreview() {
 @Preview
 @Composable
 private fun SixPartClockTimePreview() {
-    Surface(modifier = Modifier
-        .background(color = Color.White)
-        .fillMaxWidth()) {
+    Surface(
+        modifier = Modifier
+            .background(color = Color.White)
+            .fillMaxWidth()
+    ) {
 
-        val hour = remember { mutableStateOf(-1) }
-        val minute = remember { mutableStateOf(-1) }
-        val second = remember { mutableStateOf(-1) }
+        val hour = remember { mutableIntStateOf(-1) }
+        val minute = remember { mutableIntStateOf(-1) }
+        val second = remember { mutableIntStateOf(-1) }
 
         LaunchedEffect(Unit) {
             tickerFlow(1.seconds, 1.seconds)
@@ -203,9 +186,9 @@ private fun SixPartClockTimePreview() {
                     old.get(Calendar.SECOND) == new.get(Calendar.SECOND)
                 }
                 .onEach { calendar ->
-                    hour.value = calendar.get(Calendar.HOUR_OF_DAY)
-                    minute.value = calendar.get(Calendar.MINUTE)
-                    second.value = calendar.get(Calendar.SECOND)
+                    hour.intValue = calendar.get(Calendar.HOUR_OF_DAY)
+                    minute.intValue = calendar.get(Calendar.MINUTE)
+                    second.intValue = calendar.get(Calendar.SECOND)
                 }
                 .launchIn(this)
         }
@@ -218,19 +201,19 @@ private fun SixPartClockTimePreview() {
                     Modifier
                         .requiredWidthIn(0.dp, sixClockWidth)
                         .requiredHeightIn(0.dp, sixClockHeight),
-                    digits = hour.value.twoRightMostDigits()
+                    digits = hour.intValue.twoRightMostDigits()
                 )
                 SixPartClockDisplayRow(
                     Modifier
                         .requiredWidthIn(0.dp, sixClockWidth)
                         .requiredHeightIn(0.dp, sixClockHeight),
-                    digits = minute.value.twoRightMostDigits()
+                    digits = minute.intValue.twoRightMostDigits()
                 )
                 SixPartClockDisplayRow(
                     Modifier
                         .requiredWidthIn(0.dp, sixClockWidth)
                         .requiredHeightIn(0.dp, sixClockHeight),
-                    digits = second.value.twoRightMostDigits()
+                    digits = second.intValue.twoRightMostDigits()
                 )
             }
         }
