@@ -1,26 +1,42 @@
 package com.rabross.clockclock.ui
 
+import android.graphics.BlurMaskFilter
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawOutline
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.withSave
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 @Preview
 @Composable
 private fun PartClockPreview() {
     Surface {
-        PartClock(randomAngle, randomAngle, Modifier)
+        PartClock(
+            hourHandDegree = randomAngle,
+            minuteHandDegree = randomAngle
+        )
     }
 }
 
@@ -73,13 +89,13 @@ fun PartClockGridDisplay(
                         )
 
                         PartClock(
-                            hourHandDegree = hourDegree.value,
-                            minuteHandDegree = minuteDegree.value,
                             modifier = Modifier
                                 .size(clockSize)
                                 .onGloballyPositioned { coordinates ->
                                     reportPosition(index, coordinates.boundsInRoot().center)
-                                }
+                                },
+                            hourHandDegree = hourDegree.value,
+                            minuteHandDegree = minuteDegree.value
                         )
                     }
                 }
@@ -95,17 +111,17 @@ fun PartClock(
     modifier: Modifier = Modifier
 ) {
     PartClock(
+        modifier,
         hourHand.toClockHourDegree(),
         minuteHand.toClockMinuteDegree(),
-        modifier
     )
 }
 
 @Composable
 fun PartClock(
+    modifier: Modifier = Modifier,
     hourHandDegree: Float = 225f,
-    minuteHandDegree: Float = 225f,
-    modifier: Modifier = Modifier
+    minuteHandDegree: Float = 225f
 ) {
     val handColor = Color(0xFF242424)
     val minuteIndicatorColor = Color(0xFFEEEEEE)
@@ -147,7 +163,7 @@ fun PartClock(
 
 private fun DrawScope.drawClockHandCenter(color: Color, radius: Float) {
     drawCircle(color, radius)
-    drawCircle(color = Color.Black, radius = radius / 3, style = Stroke(4f))
+    drawCircle(color = color, radius = radius / 3, style = Stroke(4f))
 }
 
 private fun DrawScope.drawClockShadow(color: Color, radius: Float, depth: Float) {
@@ -214,3 +230,107 @@ private fun DrawScope.drawHand(
 private fun Int.toClockHourDegree() = this * 360f / 12
 
 private fun Int.toClockMinuteDegree() = this * 360f / 60
+
+@Preview
+@Composable
+fun DebossedClock() {
+    Surface {
+        Box(
+            modifier = Modifier
+                .background(color = Color(0xFFE0E0E0))
+                .size(200.dp)
+        ) {
+            DebossedCircle {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .drawWithCache {
+                            onDrawBehind {
+                                val radius = size.minDimension / 2f
+                                val handWidth = radius / 5.6f
+                                val handLength = radius * 0.98f
+
+                                val hourHandDegree: Float = randomAngle
+                                val minuteHandDegree: Float = randomAngle
+                                drawHand(hourHandDegree, handLength, Color.DarkGray, handWidth)
+                                drawHand(minuteHandDegree, handLength * 0.87f, Color.DarkGray, handWidth)
+                                drawClockHandCenter(Color.DarkGray, handWidth/2)
+                            }
+                        }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DebossedCircle(
+    modifier: Modifier = Modifier,
+    containerColor: Color = Color(0xFFE0E0E0), // Matches background
+    content: @Composable BoxScope.() -> Unit = {}
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .aspectRatio(1f)
+            // The light highlight (bottom-right)
+            .innerShadow(
+                shape = CircleShape,
+                color = Color.White.copy(alpha = 0.6f),
+                blur = 8.dp,
+                offsetX = (-4).dp,
+                offsetY = (-4).dp
+            )
+            // The dark shadow (top-left)
+            .innerShadow(
+                shape = CircleShape,
+                color = Color.Black.copy(alpha = 0.6f),
+                blur = 8.dp,
+                offsetX = 4.dp,
+                offsetY = 4.dp
+            )
+            .background(containerColor, CircleShape),
+        content = content
+    )
+}
+
+fun Modifier.innerShadow(
+    shape: Shape,
+    color: Color = Color.Black.copy(alpha = 0.25f),
+    blur: Dp = 4.dp,
+    offsetX: Dp = 2.dp,
+    offsetY: Dp = 2.dp
+) = drawWithContent {
+    drawContent()
+
+    val rect = Rect(Offset.Zero, size)
+    val paint = Paint().apply {
+        this.color = color
+        this.isAntiAlias = true
+    }
+
+    val shadowOutline = shape.createOutline(size, layoutDirection, this)
+
+    drawIntoCanvas { canvas ->
+        canvas.saveLayer(rect, paint)
+
+        // Draw the base shadow color inside the shape
+        canvas.drawOutline(shadowOutline, paint)
+
+        // Configure paint to "cut out" the offset shape
+        paint.asFrameworkPaint().apply {
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT)
+            if (blur.toPx() > 0) {
+                maskFilter = BlurMaskFilter(blur.toPx(), BlurMaskFilter.Blur.NORMAL)
+            }
+        }
+
+        // Offset and draw the cutout
+        canvas.translate(offsetX.toPx(), offsetY.toPx())
+        canvas.drawOutline(shadowOutline, paint)
+
+        paint.asFrameworkPaint().xfermode = null
+        paint.asFrameworkPaint().maskFilter = null
+        canvas.restore()
+    }
+}

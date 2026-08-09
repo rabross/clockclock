@@ -1,5 +1,0 @@
-package com.rabross.clockclock.ui.theme
-
-import androidx.compose.material3.Shapes
-
-val Shapes = Shapes()
