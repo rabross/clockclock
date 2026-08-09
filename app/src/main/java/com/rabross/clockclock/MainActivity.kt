@@ -1,5 +1,6 @@
 package com.rabross.clockclock
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -15,10 +16,12 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import com.rabross.clockclock.ui.ClockViewModel
 import com.rabross.clockclock.ui.PartClockGridDisplay
 import com.rabross.clockclock.ui.theme.ClockClockTheme
@@ -44,6 +47,19 @@ class MainActivity : ComponentActivity() {
 fun ClockClockScreen(viewModel: ClockViewModel) {
     val clocks by viewModel.clocks
     val isDragging by viewModel.isDragging
+    val columns by viewModel.columns
+    val rows by viewModel.rows
+
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    LaunchedEffect(isLandscape) {
+        if (isLandscape) {
+            viewModel.updateDimensions(12, 3)
+        } else {
+            viewModel.updateDimensions(4, 9)
+        }
+    }
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -79,8 +95,8 @@ fun ClockClockScreen(viewModel: ClockViewModel) {
         ) {
             PartClockGridDisplay(
                 partClocks = clocks,
-                countX = 4,
-                countY = 9,
+                countX = columns,
+                countY = rows,
                 shouldAnimate = !isDragging,
                 modifier = Modifier.fillMaxSize()
             ) { index, offset ->

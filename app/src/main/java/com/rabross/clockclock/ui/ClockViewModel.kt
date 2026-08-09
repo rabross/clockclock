@@ -20,22 +20,20 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 class ClockViewModel : ViewModel() {
 
-    private val rows = 9
-    private val columns = 4
-    private val clockCount = rows * columns
+    private val _columns = mutableIntStateOf(4)
+    val columns: State<Int> = _columns
+
+    private val _rows = mutableIntStateOf(9)
+    val rows: State<Int> = _rows
+
     private val clockUpdatePeriod = 500.milliseconds
 
-    private val _clocks = mutableStateOf(List(clockCount) { 0f to 0f })
+    private val _clocks = mutableStateOf(List(4 * 9) { 0f to 0f })
     val clocks: State<List<Pair<Float, Float>>> = _clocks
 
     private val _hour = mutableIntStateOf(-1)
-    val hour: State<Int> = _hour
-
     private val _minute = mutableIntStateOf(-1)
-    val minute: State<Int> = _minute
-
     private val _second = mutableIntStateOf(-1)
-    val second: State<Int> = _second
 
     private val _isDragging = mutableStateOf(false)
     val isDragging: State<Boolean> = _isDragging
@@ -45,6 +43,14 @@ class ClockViewModel : ViewModel() {
 
     init {
         runTimeAnimation()
+    }
+
+    fun updateDimensions(cols: Int, rows: Int) {
+        if (_columns.intValue != cols || _rows.intValue != rows) {
+            _columns.intValue = cols
+            _rows.intValue = rows
+            updateClockFace()
+        }
     }
 
     fun onDragStart() {
@@ -92,16 +98,34 @@ class ClockViewModel : ViewModel() {
         val digitsMinute = _minute.intValue.twoRightMostDigits()
         val digitsSecond = _second.intValue.twoRightMostDigits()
 
+        val cols = _columns.intValue
+        val rows = _rows.intValue
+        val isLandscape = cols > rows
+        val clockCount = cols * rows
+
         val temp = MutableList(clockCount) { 0f to 0f }
         val numWidth = 2
         val numHeight = 3
 
-        temp.insert(columns, Number.map(digitsHour.first).partClocks, numWidth, numWidth, 0)
-        temp.insert(columns, Number.map(digitsHour.second).partClocks, numWidth, 0, 0)
-        temp.insert(columns, Number.map(digitsMinute.first).partClocks, numWidth, numWidth, numHeight)
-        temp.insert(columns, Number.map(digitsMinute.second).partClocks, numWidth, 0, numHeight)
-        temp.insert(columns, Number.map(digitsSecond.first).partClocks, numWidth, numWidth, numHeight * 2)
-        temp.insert(columns, Number.map(digitsSecond.second).partClocks, numWidth, 0, numHeight * 2)
+        if (isLandscape) {
+            // Landscape layout: HH MM SS side-by-side (12 columns)
+            temp.insert(cols, Number.map(digitsHour.second).partClocks, numWidth, 0, 0)
+            temp.insert(cols, Number.map(digitsHour.first).partClocks, numWidth, 2, 0)
+
+            temp.insert(cols, Number.map(digitsMinute.second).partClocks, numWidth, 4, 0)
+            temp.insert(cols, Number.map(digitsMinute.first).partClocks, numWidth, 6, 0)
+
+            temp.insert(cols, Number.map(digitsSecond.second).partClocks, numWidth, 8, 0)
+            temp.insert(cols, Number.map(digitsSecond.first).partClocks, numWidth, 10, 0)
+        } else {
+            // Portrait layout: HH, MM, SS stacked
+            temp.insert(cols, Number.map(digitsHour.first).partClocks, numWidth, numWidth, 0)
+            temp.insert(cols, Number.map(digitsHour.second).partClocks, numWidth, 0, 0)
+            temp.insert(cols, Number.map(digitsMinute.first).partClocks, numWidth, numWidth, numHeight)
+            temp.insert(cols, Number.map(digitsMinute.second).partClocks, numWidth, 0, numHeight)
+            temp.insert(cols, Number.map(digitsSecond.first).partClocks, numWidth, numWidth, numHeight * 2)
+            temp.insert(cols, Number.map(digitsSecond.second).partClocks, numWidth, 0, numHeight * 2)
+        }
 
         _clocks.value = temp
     }
