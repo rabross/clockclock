@@ -152,4 +152,12 @@ class ClockViewModel : ViewModel() {
             }
         }
     }
+
+    fun screenResume() {
+        runTimeAnimation()
+    }
+
+    fun screenPause() {
+        timeAnimationJob?.cancel()
+    }
 }

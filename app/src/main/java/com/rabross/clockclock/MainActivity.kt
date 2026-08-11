@@ -43,6 +43,16 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onPause() {
+        viewModel.screenPause()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.screenResume()
+    }
 }
 
 @Composable
