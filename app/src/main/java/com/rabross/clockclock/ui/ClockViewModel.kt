@@ -41,10 +41,6 @@ class ClockViewModel : ViewModel() {
     private var timeAnimationJob: Job? = null
     private val offsetMap = mutableMapOf<Int, Offset>()
 
-    init {
-        runTimeAnimation()
-    }
-
     fun updateDimensions(cols: Int, rows: Int) {
         if (_columns.intValue != cols || _rows.intValue != rows) {
             _columns.intValue = cols
