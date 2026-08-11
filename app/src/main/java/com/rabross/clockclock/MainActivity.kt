@@ -13,17 +13,19 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.dp
 import com.rabross.clockclock.ui.ClockViewModel
-import com.rabross.clockclock.ui.PartClockGridDisplay
+import com.rabross.clockclock.ui.DebossedClockFace
+import com.rabross.clockclock.ui.ClocksGridDisplay
 import com.rabross.clockclock.ui.theme.ClockClockTheme
 import kotlin.time.ExperimentalTime
 
@@ -62,7 +64,7 @@ fun ClockClockScreen(viewModel: ClockViewModel) {
     }
 
     Surface(
-        color = MaterialTheme.colorScheme.background,
+        color =  Color(0xFFE0E0E0),//MaterialTheme.colorScheme.background,
         modifier = Modifier
             .fillMaxSize()
             .padding(WindowInsets.systemBars.asPaddingValues())
@@ -93,14 +95,21 @@ fun ClockClockScreen(viewModel: ClockViewModel) {
                     )
                 }
         ) {
-            PartClockGridDisplay(
-                partClocks = clocks,
+            ClocksGridDisplay(
+                clocks = clocks,
                 countX = columns,
                 countY = rows,
                 shouldAnimate = !isDragging,
-                modifier = Modifier.fillMaxSize()
-            ) { index, offset ->
-                viewModel.reportPosition(index, offset)
+                modifier = Modifier.fillMaxSize(),
+                reportPosition = { index, offset ->
+                    viewModel.reportPosition(index, offset)
+                }
+            ) { hour, minute, modifier ->
+                DebossedClockFace(
+                    modifier = modifier.padding(2.dp),
+                    hourHandDegree = hour,
+                    minuteHandDegree = minute
+                )
             }
         }
     }

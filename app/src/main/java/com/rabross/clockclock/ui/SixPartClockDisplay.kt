@@ -14,7 +14,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rabross.clockclock.ui.models.Number
@@ -30,18 +29,25 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun SixPartClockDisplay(
     number: Number,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    clock: @Composable (hour: Float, minute: Float, modifier: Modifier) -> Unit = { hour, minute, mod ->
+        ClockFace(modifier = mod, hourHandDegree = hour, minuteHandDegree = minute)
+    }
 ) {
     SixPartClockDisplay(
-        number.partClocks,
-        modifier
+        partClocks = number.partClocks,
+        modifier = modifier,
+        clock = clock
     )
 }
 
 @Composable
 fun SixPartClockDisplay(
     partClocks: SixPartClock,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    clock: @Composable (hour: Float, minute: Float, modifier: Modifier) -> Unit = { hour, minute, mod ->
+        ClockFace(modifier = mod, hourHandDegree = hour, minuteHandDegree = minute)
+    }
 ) {
     val rowSize = 2
     val columnSize = 3
@@ -54,10 +60,10 @@ fun SixPartClockDisplay(
                 Row(horizontalArrangement = Arrangement.SpaceEvenly) {
                     repeat(rowSize) { column ->
                         val partClock = partClocks[(row * rowSize) + column]
-                        PartClock(
+                        clock(
                             partClock.first,
                             partClock.second,
-                            modifier = Modifier.size(clockSize)
+                            Modifier.size(clockSize)
                         )
                     }
                 }
@@ -67,12 +73,19 @@ fun SixPartClockDisplay(
 }
 
 @Composable
-fun SixPartClockDisplayRow(modifier: Modifier = Modifier, digits: Pair<Int, Int>) {
+fun SixPartClockDisplayRow(
+    modifier: Modifier = Modifier,
+    digits: Pair<Int, Int>,
+    clock: @Composable (hour: Float, minute: Float, modifier: Modifier) -> Unit = { hour, minute, mod ->
+        ClockFace(modifier = mod, hourHandDegree = hour, minuteHandDegree = minute)
+    }
+) {
     Row(horizontalArrangement = Arrangement.Start) {
         digits.reverseMap {
             SixPartClockDisplay(
-                Number.map(it),
-                modifier
+                number = Number.map(it),
+                modifier = modifier,
+                clock = clock
             )
         }
     }
