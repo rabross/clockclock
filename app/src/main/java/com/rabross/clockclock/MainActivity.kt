@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -74,7 +76,7 @@ fun ClockClockScreen(viewModel: ClockViewModel) {
     }
 
     Surface(
-        color =  Color(0xFFE0E0E0),//MaterialTheme.colorScheme.background,
+        color = MaterialTheme.colorScheme.background,
         modifier = Modifier
             .fillMaxSize()
             .padding(WindowInsets.systemBars.asPaddingValues())
@@ -83,6 +85,7 @@ fun ClockClockScreen(viewModel: ClockViewModel) {
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .fillMaxSize()
+                .background(Color(0xFFE0E0E0))
                 .pointerInput(Unit) {
                     var offsetX = -1f
                     var offsetY = -1f
@@ -116,7 +119,7 @@ fun ClockClockScreen(viewModel: ClockViewModel) {
                 }
             ) { hour, minute, modifier ->
                 DebossedClockFace(
-                    modifier = modifier.padding(2.dp),
+                    modifier = modifier.padding(3.dp),
                     hourHandDegree = hour,
                     minuteHandDegree = minute
                 )
